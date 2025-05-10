@@ -1,0 +1,30 @@
+# Configuración de finales de línea para GitAttributes
+# Más info: https://git-scm.com/docs/gitattributes
+
+# Por defecto, normalizar finales de línea para todos los archivos
+* text=auto
+
+# Establecer explícitamente que los archivos de texto usen LF
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.prisma text eol=lf
+*.env* text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+
+# Archivos binarios que no deben ser modificados
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary

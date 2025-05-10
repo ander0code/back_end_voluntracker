@@ -171,14 +171,20 @@ exports.Prisma.VoluntariosScalarFieldEnum = {
 exports.Prisma.EventosScalarFieldEnum = {
   id: 'id',
   titulo: 'titulo',
+  nombre: 'nombre',
   descripcion: 'descripcion',
   inicio: 'inicio',
+  fecha_inicio: 'fecha_inicio',
   fin: 'fin',
+  fecha_fin: 'fecha_fin',
   ubicacion: 'ubicacion',
+  tipo: 'tipo',
+  estado: 'estado',
   coordinador_id: 'coordinador_id',
   capacidad: 'capacidad',
   creado_en: 'creado_en',
-  actualizado_en: 'actualizado_en'
+  actualizado_en: 'actualizado_en',
+  requisitos: 'requisitos'
 };
 
 exports.Prisma.InscripcionesScalarFieldEnum = {
@@ -186,9 +192,9 @@ exports.Prisma.InscripcionesScalarFieldEnum = {
   evento_id: 'evento_id',
   voluntario_id: 'voluntario_id',
   estado: 'estado',
+  fecha_inscripcion: 'fecha_inscripcion',
   creado_en: 'creado_en',
-  actualizado_en: 'actualizado_en',
-  coordinador_id: 'coordinador_id'
+  actualizado_en: 'actualizado_en'
 };
 
 exports.Prisma.AsistenciaScalarFieldEnum = {
@@ -206,6 +212,17 @@ exports.Prisma.CertificadosScalarFieldEnum = {
   url_pdf: 'url_pdf',
   emitido_en: 'emitido_en',
   coordinador_id: 'coordinador_id'
+};
+
+exports.Prisma.UsuariosScalarFieldEnum = {
+  id: 'id',
+  nombre: 'nombre',
+  correo: 'correo',
+  hash_contrasena: 'hash_contrasena',
+  rol: 'rol',
+  permisos: 'permisos',
+  creado_en: 'creado_en',
+  actualizado_en: 'actualizado_en'
 };
 
 exports.Prisma.SortOrder = {
@@ -243,7 +260,8 @@ exports.Prisma.ModelName = {
   eventos: 'eventos',
   inscripciones: 'inscripciones',
   asistencia: 'asistencia',
-  certificados: 'certificados'
+  certificados: 'certificados',
+  usuarios: 'usuarios'
 };
 
 /**

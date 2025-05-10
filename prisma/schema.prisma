@@ -11,13 +11,13 @@ datasource db {
 
 /// Administradores de la plataforma
 model administradores {
-  id               String   @id @default(uuid()) @db.Uuid
-  nombre           String
-  correo           String   @unique
-  hash_contrasena  String
+  id              String   @id @default(uuid()) @db.Uuid
+  nombre          String
+  correo          String   @unique
+  hash_contrasena String
   permisos         Json?
-  creado_en        DateTime @default(now()) @db.Timestamp(6)
-  actualizado_en   DateTime @default(now()) @db.Timestamp(6)
+  creado_en       DateTime @default(now()) @db.Timestamp(6)
+  actualizado_en  DateTime @default(now()) @db.Timestamp(6)
 }
 
 /// Organizaciones (tenants)
@@ -68,33 +68,41 @@ model voluntarios {
 }
 
 model eventos {
-  id             String    @id @default(uuid()) @db.Uuid
-  titulo         String
-  descripcion    String?
-  inicio         DateTime  @db.Timestamp(6)
-  fin            DateTime? @db.Timestamp(6)
-  ubicacion      String?
-  coordinador_id String    @db.Uuid
-  capacidad      Int?
-  creado_en      DateTime  @default(now())
-  actualizado_en DateTime  @default(now())
+  id              String    @id @default(uuid()) @db.Uuid
+  titulo          String
+  nombre          String?   // Para mantener compatibilidad con código existente
+  descripcion     String?
+  inicio          DateTime  @db.Timestamp(6)
+  fecha_inicio    DateTime  @db.Timestamp(6) // Alias para mantener compatibilidad
+  fin             DateTime? @db.Timestamp(6)
+  fecha_fin       DateTime? @db.Timestamp(6) // Alias para mantener compatibilidad
+  ubicacion       String?
+  tipo            String?   // presencial, virtual, hibrido
+  estado          String?   // borrador, publicado, cancelado, completado
+  coordinador_id  String    @db.Uuid
+  capacidad       Int?
+  creado_en       DateTime  @default(now())
+  actualizado_en  DateTime  @default(now())
+  requisitos      Json?
 
-  inscripciones inscripciones[]
-  certificados  certificados[]
+  // Relaciones
+  coordinador    usuarios     @relation("EventoCoordinador", fields: [coordinador_id], references: [id])
+  inscripciones  inscripciones[]
+  certificados   certificados[]
 
 }
 
 model inscripciones {
-  id             String   @id @default(uuid()) @db.Uuid
-  evento_id      String   @db.Uuid
-  voluntario_id  String   @db.Uuid
-  estado         String?
-  creado_en      DateTime @default(now())
-  actualizado_en DateTime @default(now())
-  coordinador_id String    @db.Uuid
+  id                String   @id @default(uuid()) @db.Uuid
+  evento_id         String   @db.Uuid
+  voluntario_id     String   @db.Uuid
+  estado            String?
+  fecha_inscripcion DateTime @default(now()) // Añadir este campo
+  creado_en         DateTime @default(now())
+  actualizado_en    DateTime @default(now())
 
-  eventos     eventos      @relation(fields: [evento_id], references: [id])
-  voluntarios voluntarios  @relation(fields: [voluntario_id], references: [id])
+  eventos     eventos     @relation(fields: [evento_id], references: [id])
+  voluntarios voluntarios @relation(fields: [voluntario_id], references: [id])
   asistencia  asistencia[]
 }
 
@@ -118,4 +126,19 @@ model certificados {
 
   voluntarios voluntarios @relation(fields: [voluntario_id], references: [id])
   eventos     eventos     @relation(fields: [evento_id], references: [id])
+}
+
+// Modelo de usuarios para esquema tenant
+model usuarios {
+  id               String   @id @default(uuid()) @db.Uuid
+  nombre           String
+  correo           String   @unique
+  hash_contrasena  String
+  rol              String
+  permisos         Json?
+  creado_en        DateTime @default(now()) @db.Timestamp(6)
+  actualizado_en   DateTime @default(now()) @db.Timestamp(6)
+  
+  // Relaciones (si necesarias)
+  eventos          eventos[]   @relation("EventoCoordinador")
 }
