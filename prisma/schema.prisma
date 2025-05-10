@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Administradores de la plataforma
+model administradores {
+  id               String   @id @default(uuid()) @db.Uuid
+  nombre           String
+  correo           String   @unique
+  hash_contrasena  String
+  permisos         Json?
+  creado_en        DateTime @default(now()) @db.Timestamp(6)
+  actualizado_en   DateTime @default(now()) @db.Timestamp(6)
+}
+
+/// Organizaciones (tenants)
+model organizaciones {
+  id                  String    @id @default(uuid()) @db.Uuid
+  nombre              String
+  nombre_esquema      String    @unique
+  subdominio          String?   @unique
+  marca               Json?
+  plan                String?
+  fecha_proximo_pago  DateTime? @db.Date
+  estado              String?
+  creado_en           DateTime  @default(now()) @db.Timestamp(6)
+  actualizado_en      DateTime  @default(now()) @db.Timestamp(6)
+}
+
+/// Usuarios de tenant (centralizados)
+model tenant_usuarios {
+  id               String   @id @default(uuid()) @db.Uuid
+  tenant_id        String   @db.Uuid
+  nombre           String
+  correo           String   @unique
+  hash_contrasena  String
+  rol              String
+  permisos         Json?
+  creado_en        DateTime @default(now()) @db.Timestamp(6)
+  actualizado_en   DateTime @default(now()) @db.Timestamp(6)
+  
+
+}
+
+// ——— TENANT BUSINESS (dinámico via search_path) ———
+
+model voluntarios {
+  id              String   @id @default(uuid()) @db.Uuid
+  nombre_completo String
+  dni             String?  @unique
+  correo          String?
+  telefono        String?
+  area            String?
+  estado          String?
+  historial       Json?
+  registrado_en   DateTime @default(now())
+  coordinador_id String    @db.Uuid
+
+  inscripciones inscripciones[]
+  certificados  certificados[]
+}
+
+model eventos {
+  id             String    @id @default(uuid()) @db.Uuid
+  titulo         String
+  descripcion    String?
+  inicio         DateTime  @db.Timestamp(6)
+  fin            DateTime? @db.Timestamp(6)
+  ubicacion      String?
+  coordinador_id String    @db.Uuid
+  capacidad      Int?
+  creado_en      DateTime  @default(now())
+  actualizado_en DateTime  @default(now())
+
+  inscripciones inscripciones[]
+  certificados  certificados[]
+
+}
+
+model inscripciones {
+  id             String   @id @default(uuid()) @db.Uuid
+  evento_id      String   @db.Uuid
+  voluntario_id  String   @db.Uuid
+  estado         String?
+  creado_en      DateTime @default(now())
+  actualizado_en DateTime @default(now())
+  coordinador_id String    @db.Uuid
+
+  eventos     eventos      @relation(fields: [evento_id], references: [id])
+  voluntarios voluntarios  @relation(fields: [voluntario_id], references: [id])
+  asistencia  asistencia[]
+}
+
+model asistencia {
+  id             String   @id @default(uuid()) @db.Uuid
+  inscripcion_id String   @db.Uuid
+  estado         String?
+  marcado_en     DateTime @default(now())
+  coordinador_id String    @db.Uuid
+
+  inscripciones inscripciones @relation(fields: [inscripcion_id], references: [id])
+}
+
+model certificados {
+  id            String   @id @default(uuid()) @db.Uuid
+  voluntario_id String   @db.Uuid
+  evento_id     String   @db.Uuid
+  url_pdf       String?
+  emitido_en    DateTime @default(now())
+  coordinador_id String    @db.Uuid
+
+  voluntarios voluntarios @relation(fields: [voluntario_id], references: [id])
+  eventos     eventos     @relation(fields: [evento_id], references: [id])
+}

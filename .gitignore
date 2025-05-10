@@ -1,0 +1,69 @@
+# Dependencias
+node_modules/
+.pnpm-store/
+
+# Archivos de compilación
+dist/
+build/
+*.tsbuildinfo
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Archivos de entorno
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# Prisma
+prisma/.env
+prisma/migrations/*_init/migration.sql
+# Código generado por Prisma
+src/generated/prisma/
+
+# Directorios de caché del sistema
+.npm
+.eslintcache
+.node_repl_history
+*.tgz
+.yarn-integrity
+
+# Directorios de editores
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+.prettierrc
+.prettierignore
+
+# Archivos de configuración personales
+**/personal-config.json
+**/personal-config.js
+
+# Archivos de cobertura de código
+coverage/
+
+# Archivos de despliegue
+.vercel
+.netlify
+.serverless/
+.dynamodb/
+.fusebox/
+.cache/
+
+# Archivos de producción
+.env.production
+production-config.json
+
+# Archivos temporales
+tmp/
+temp/
