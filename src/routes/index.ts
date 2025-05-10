@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import authRoutes from '../modules/auth/routes/auth.routes';
-import adminRoutes from '../modules/admin/routes/admin.routes';
-import tenantRoutes from '../modules/tenant/tenant.routes';
+import authRoutes from '../modules/auth/auth.routes';
+import adminRoutes from '../modules/admin/admin.routes';
+
 
 const router = Router();
 
@@ -12,6 +12,4 @@ router.use('/auth', authRoutes);
 router.use('/admin', adminRoutes);
 
 // Montar las rutas de tenant en /api/tenant
-router.use('/tenant', tenantRoutes);
-
 export default router;

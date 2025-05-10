@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { login, register, invite } from '../controllers/auth.controller';
-import { authMiddleware, requireRole, requirePermission } from '../../../shared/middleware/auth';
-import { UserType } from '../../../shared/interfaces';
+import { login, register, invite } from './controllers/auth.controller';
+import { authMiddleware, requireRole, requirePermission } from '../../shared/middleware/auth';
+import { UserType } from '../../shared/interfaces';
 
 const router = Router();
 
