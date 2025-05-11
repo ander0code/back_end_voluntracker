@@ -136,11 +136,19 @@ exports.Prisma.OrganizacionesScalarFieldEnum = {
   nombre_esquema: 'nombre_esquema',
   subdominio: 'subdominio',
   marca: 'marca',
-  plan: 'plan',
-  fecha_proximo_pago: 'fecha_proximo_pago',
-  estado: 'estado',
   creado_en: 'creado_en',
   actualizado_en: 'actualizado_en'
+};
+
+exports.Prisma.SuscripcionesScalarFieldEnum = {
+  id: 'id',
+  organizacionId: 'organizacionId',
+  plan: 'plan',
+  fechaInicio: 'fechaInicio',
+  fechaProximoPago: 'fechaProximoPago',
+  estado: 'estado',
+  creadoEn: 'creadoEn',
+  actualizadoEn: 'actualizadoEn'
 };
 
 exports.Prisma.Tenant_usuariosScalarFieldEnum = {
@@ -214,17 +222,6 @@ exports.Prisma.CertificadosScalarFieldEnum = {
   coordinador_id: 'coordinador_id'
 };
 
-exports.Prisma.UsuariosScalarFieldEnum = {
-  id: 'id',
-  nombre: 'nombre',
-  correo: 'correo',
-  hash_contrasena: 'hash_contrasena',
-  rol: 'rol',
-  permisos: 'permisos',
-  creado_en: 'creado_en',
-  actualizado_en: 'actualizado_en'
-};
-
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -255,13 +252,13 @@ exports.Prisma.NullsOrder = {
 exports.Prisma.ModelName = {
   administradores: 'administradores',
   organizaciones: 'organizaciones',
+  suscripciones: 'suscripciones',
   tenant_usuarios: 'tenant_usuarios',
   voluntarios: 'voluntarios',
   eventos: 'eventos',
   inscripciones: 'inscripciones',
   asistencia: 'asistencia',
-  certificados: 'certificados',
-  usuarios: 'usuarios'
+  certificados: 'certificados'
 };
 
 /**

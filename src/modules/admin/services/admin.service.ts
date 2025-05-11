@@ -13,23 +13,44 @@ import { v4 as uuidv4 } from 'uuid';
 
 export class AdminService {
   /**
-   * Obtener todas las organizaciones
+   * Obtener todas las organizaciones con sus suscripciones
    */
   async getAllOrganizaciones() {
     try {
-      return await prisma.organizaciones.findMany({
+      const organizaciones = await prisma.organizaciones.findMany({
         select: {
           id: true,
           nombre: true,
           nombre_esquema: true,
-          plan: true,
-          estado: true,
           creado_en: true,
           actualizado_en: true,
           subdominio: true,
           marca: true,
-          fecha_proximo_pago: true
+          suscripciones: {
+            select: {
+              plan: true,
+              estado: true,
+              fechaProximoPago: true
+            },
+            orderBy: {
+              creadoEn: 'desc'
+            },
+            take: 1
+          }
         }
+      });
+
+      // Transformar los resultados para mantener la estructura esperada por el frontend
+      return organizaciones.map(org => {
+        const suscripcion = org.suscripciones[0] || {};
+        return {
+          ...org,
+          plan: suscripcion.plan || 'basico',
+          estado: suscripcion.estado || 'activo',
+          fecha_proximo_pago: suscripcion.fechaProximoPago,
+          // Eliminamos el array de suscripciones para mantener la estructura plana
+          suscripciones: undefined
+        };
       });
     } catch (error) {
       logger.error(`Error al obtener organizaciones: ${error}`);
@@ -48,13 +69,21 @@ export class AdminService {
           id: true,
           nombre: true,
           nombre_esquema: true,
-          plan: true,
-          estado: true,
-          fecha_proximo_pago: true,
           creado_en: true,
           actualizado_en: true,
           subdominio: true,
-          marca: true
+          marca: true,
+          suscripciones: {
+            select: {
+              plan: true,
+              estado: true,
+              fechaProximoPago: true
+            },
+            orderBy: {
+              creadoEn: 'desc'
+            },
+            take: 1
+          }
         }
       });
 
@@ -62,23 +91,34 @@ export class AdminService {
         throw new AppError('Organización no encontrada', 404);
       }
 
-      return organizacion;
+      // Transformar el resultado para mantener la misma estructura
+      const suscripcion = organizacion.suscripciones[0] || {};
+      return {
+        ...organizacion,
+        plan: suscripcion.plan || 'basico',
+        estado: suscripcion.estado || 'activo',
+        fecha_proximo_pago: suscripcion.fechaProximoPago,
+        suscripciones: undefined
+      };
     } catch (error) {
       if (error instanceof AppError) throw error;
       logger.error(`Error al obtener organización: ${error}`);
       throw new AppError('Error al obtener organización', 500);
     }
   }
-
   /**
-   * Crear una nueva organización
+   * Crear una nueva organización con su suscripción
    */
   async createOrganizacion(data: CreateOrganizacionDto) {
     try {
+      // Preparar nombre_schema (tiene que ser string, no undefined)
+      let nombreSchema: string;
+      
       // Si se proporciona un nombre_schema, verificar que no exista
       if (data.nombre_schema) {
+        nombreSchema = data.nombre_schema;
         const existingSchema = await prisma.organizaciones.findFirst({
-          where: { nombre_esquema: data.nombre_schema }
+          where: { nombre_esquema: nombreSchema }
         });
 
         if (existingSchema) {
@@ -87,38 +127,45 @@ export class AdminService {
       } else {
         // Generar un nombre de schema basado en el nombre y un timestamp
         const timestamp = Date.now().toString().slice(-6);
-        data.nombre_schema = data.nombre.toLowerCase()
+        nombreSchema = data.nombre.toLowerCase()
           .replace(/[^a-z0-9_]/g, '_')
           .substring(0, 15) + '_' + timestamp;
       }
 
       // Crear el schema para la organización
-      await prisma.$executeRawUnsafe(`CREATE SCHEMA IF NOT EXISTS "${data.nombre_schema}";`);
-      logger.info(`Schema "${data.nombre_schema}" creado con éxito`);
+      await prisma.$executeRawUnsafe(`CREATE SCHEMA IF NOT EXISTS "${nombreSchema}";`);
+      logger.info(`Schema "${nombreSchema}" creado con éxito`);
 
-      // Crear la organización
-      const newOrg = await prisma.organizaciones.create({
-        data: {
-          nombre: data.nombre,
-          nombre_esquema: data.nombre_schema,
-          subdominio: data.subdominio,
-          marca: data.marca as any,
-          plan: data.plan || 'basico',
-          estado: data.estado || 'activo',
-        },
-        select: {
-          id: true,
-          nombre: true,
-          nombre_esquema: true,
-          plan: true,
-          estado: true,
-          creado_en: true,
-          actualizado_en: true
-        }
+      // Usar transacción para crear organización y suscripción
+      const result = await prisma.$transaction(async (tx) => {
+        // 1. Crear la organización
+        const newOrg = await tx.organizaciones.create({
+          data: {
+            nombre: data.nombre,
+            nombre_esquema: nombreSchema,
+            subdominio: data.subdominio,
+            marca: data.marca as any
+          }
+        });
+
+        // 2. Crear la suscripción asociada
+        const suscripcionData = data.suscripcion || {};
+        await tx.suscripciones.create({
+          data: {
+            id: uuidv4(),
+            organizacionId: newOrg.id,
+            plan: suscripcionData.plan || 'basico',
+            estado: suscripcionData.estado || 'activo',
+            fechaProximoPago: suscripcionData.fechaProximoPago || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 días desde hoy
+            fechaInicio: new Date()
+          }
+        });
+
+        return newOrg;
       });
 
-      // Devolver la organización creada
-      return newOrg;
+      // Obtener la organización con su suscripción para devolver
+      return this.getOrganizacionById(result.id);
     } catch (error) {
       // Si ocurre un error y se llegó a crear el schema, limpiarlo
       if (data.nombre_schema) {
@@ -142,7 +189,15 @@ export class AdminService {
     try {
       // Verificar que la organización existe
       const org = await prisma.organizaciones.findUnique({
-        where: { id }
+        where: { id },
+        include: {
+          suscripciones: {
+            orderBy: {
+              creadoEn: 'desc'
+            },
+            take: 1
+          }
+        }
       });
 
       if (!org) {
@@ -154,31 +209,50 @@ export class AdminService {
         throw new AppError('No se puede cambiar el nombre del schema', 400);
       }
 
-      // Actualizar la organización
-      const updatedOrg = await prisma.organizaciones.update({
-        where: { id },
-        data: {
-          nombre: data.nombre,
-          subdominio: data.subdominio,
-          plan: data.plan,
-          estado: data.estado,
-          marca: data.marca as any,
-          fecha_proximo_pago: data.fecha_proximo_pago
-        },
-        select: {
-          id: true,
-          nombre: true,
-          nombre_esquema: true,
-          plan: true,
-          estado: true,
-          creado_en: true,
-          actualizado_en: true,
-          subdominio: true,
-          fecha_proximo_pago: true
+      // Usar transacción para actualizar organización y suscripción
+      await prisma.$transaction(async (tx) => {
+        // 1. Actualizar la organización
+        await tx.organizaciones.update({
+          where: { id },
+          data: {
+            nombre: data.nombre,
+            subdominio: data.subdominio,
+            marca: data.marca as any
+          }
+        });
+
+        // 2. Si hay datos de suscripción para actualizar
+        if (data.plan || data.estado || data.fecha_proximo_pago) {
+          const suscripcion = org.suscripciones[0];
+          
+          if (suscripcion) {
+            // Actualizar la suscripción existente
+            await tx.suscripciones.update({
+              where: { id: suscripcion.id },
+              data: {
+                plan: data.plan,
+                estado: data.estado,
+                fechaProximoPago: data.fecha_proximo_pago
+              }
+            });
+          } else {
+            // Crear una nueva suscripción si no existe
+            await tx.suscripciones.create({
+              data: {
+                id: uuidv4(),
+                organizacionId: id,
+                plan: data.plan || 'basico',
+                estado: data.estado || 'activo',
+                fechaProximoPago: data.fecha_proximo_pago || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                fechaInicio: new Date()
+              }
+            });
+          }
         }
       });
 
-      return updatedOrg;
+      // Obtener la organización actualizada
+      return this.getOrganizacionById(id);
     } catch (error) {
       if (error instanceof AppError) throw error;
       logger.error(`Error al actualizar organización: ${error}`);
@@ -200,7 +274,12 @@ export class AdminService {
         throw new AppError('Organización no encontrada', 404);
       }
 
-      // Eliminar la organización
+      // Eliminar primero las suscripciones asociadas
+      await prisma.suscripciones.deleteMany({
+        where: { organizacionId: id }
+      });
+
+      // Luego eliminar la organización
       await prisma.organizaciones.delete({
         where: { id }
       });
@@ -223,34 +302,48 @@ export class AdminService {
     try {
       // Verificar que la organización existe
       const org = await prisma.organizaciones.findUnique({
-        where: { id }
+        where: { id },
+        include: {
+          suscripciones: {
+            orderBy: {
+              creadoEn: 'desc'
+            },
+            take: 1
+          }
+        }
       });
 
       if (!org) {
         throw new AppError('Organización no encontrada', 404);
       }
 
-      // Actualizar el plan de la organización
-      const updatedOrg = await prisma.organizaciones.update({
-        where: { id },
-        data: {
-          plan: data.plan,
-          actualizado_en: new Date()
-        },
-        select: {
-          id: true,
-          nombre: true,
-          nombre_esquema: true,
-          plan: true,
-          estado: true,
-          fecha_proximo_pago: true,
-          creado_en: true,
-          actualizado_en: true
-        }
-      });
+      const suscripcion = org.suscripciones[0];
+      
+      if (suscripcion) {
+        // Actualizar suscripción existente
+        await prisma.suscripciones.update({
+          where: { id: suscripcion.id },
+          data: {
+            plan: data.plan,
+            actualizadoEn: new Date()
+          }
+        });
+      } else {
+        // Crear nueva suscripción si no existe
+        await prisma.suscripciones.create({
+          data: {
+            id: uuidv4(),
+            organizacionId: id,
+            plan: data.plan,
+            estado: 'activo',
+            fechaInicio: new Date(),
+            fechaProximoPago: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+          }
+        });
+      }
 
       logger.info(`Plan actualizado para organización ${id}: ${data.plan}`);
-      return updatedOrg;
+      return this.getOrganizacionById(id);
     } catch (error) {
       if (error instanceof AppError) throw error;
       logger.error(`Error al actualizar plan de organización: ${error}`);
@@ -265,59 +358,92 @@ export class AdminService {
     try {
       // Verificar que la organización existe
       const org = await prisma.organizaciones.findUnique({
-        where: { id }
+        where: { id },
+        include: {
+          suscripciones: {
+            orderBy: {
+              creadoEn: 'desc'
+            },
+            take: 1
+          }
+        }
       });
 
       if (!org) {
         throw new AppError('Organización no encontrada', 404);
       }
 
-      // Actualizar la fecha de próximo pago
-      const updatedOrg = await prisma.organizaciones.update({
-        where: { id },
-        data: {
-          fecha_proximo_pago: data.fecha_proximo_pago,
-          actualizado_en: new Date()
-        },
-        select: {
-          id: true,
-          nombre: true,
-          nombre_esquema: true,
-          plan: true,
-          estado: true,
-          fecha_proximo_pago: true,
-          creado_en: true,
-          actualizado_en: true
-        }
-      });
+      const suscripcion = org.suscripciones[0];
+      
+      if (suscripcion) {
+        // Actualizar suscripción existente
+        await prisma.suscripciones.update({
+          where: { id: suscripcion.id },
+          data: {
+            fechaProximoPago: data.fecha_proximo_pago,
+            actualizadoEn: new Date()
+          }
+        });
+      } else {
+        // Crear nueva suscripción si no existe
+        await prisma.suscripciones.create({
+          data: {
+            id: uuidv4(),
+            organizacionId: id,
+            plan: 'basico',
+            estado: 'activo',
+            fechaInicio: new Date(),
+            fechaProximoPago: data.fecha_proximo_pago
+          }
+        });
+      }
 
       logger.info(`Fecha de próximo pago actualizada para organización ${id}: ${data.fecha_proximo_pago}`);
-      return updatedOrg;
+      return this.getOrganizacionById(id);
     } catch (error) {
       if (error instanceof AppError) throw error;
       logger.error(`Error al actualizar fecha de próximo pago: ${error}`);
       throw new AppError('Error al actualizar fecha de próximo pago', 500);
     }
   }
+
   /**
    * Listar todos los tenants con información resumida (para dropdown)
    */
   async getAllTenants() {
     try {
-      return await prisma.organizaciones.findMany({
+      const organizaciones = await prisma.organizaciones.findMany({
         select: {
           id: true,
           nombre: true,
           nombre_esquema: true,
-          estado: true
-        },
-        where: {
-          estado: 'activo'
+          suscripciones: {
+            select: {
+              estado: true
+            },
+            orderBy: {
+              creadoEn: 'desc'
+            },
+            take: 1
+          }
         },
         orderBy: {
           nombre: 'asc'
         }
       });
+
+      // Filtrar solo organizaciones activas y transformar resultado
+      return organizaciones
+        .filter(org => {
+          const suscripcion = org.suscripciones[0];
+          return !suscripcion || suscripcion.estado === 'activo';
+        })
+        .map(org => ({
+          id: org.id,
+          nombre: org.nombre,
+          nombre_esquema: org.nombre_esquema,
+          estado: org.suscripciones[0]?.estado || 'activo'
+        }));
     } catch (error) {
       logger.error(`Error al obtener lista de tenants: ${error}`);
       throw new AppError('Error al obtener lista de tenants', 500);

@@ -22,16 +22,29 @@ model administradores {
 
 /// Organizaciones (tenants)
 model organizaciones {
-  id                 String    @id @default(uuid()) @db.Uuid
-  nombre             String
-  nombre_esquema     String    @unique
-  subdominio         String?   @unique
-  marca              Json?
-  plan               String?
-  fecha_proximo_pago DateTime? @db.Date
-  estado             String?
-  creado_en          DateTime  @default(now()) @db.Timestamp(6)
-  actualizado_en     DateTime  @default(now()) @db.Timestamp(6)
+  id             String   @id @default(uuid()) @db.Uuid
+  nombre         String
+  nombre_esquema String   @unique
+  subdominio     String?  @unique
+  marca          Json?
+  creado_en      DateTime @default(now()) @db.Timestamp(6)
+  actualizado_en DateTime @default(now()) @db.Timestamp(6)
+
+  suscripciones   suscripciones[]
+  tenant_usuarios tenant_usuarios[]
+}
+
+model suscripciones {
+  id               String    @id @default(uuid()) @db.Uuid
+  organizacionId   String    @db.Uuid
+  plan             String?   @db.Text
+  fechaInicio      DateTime? @db.Date
+  fechaProximoPago DateTime? @db.Date
+  estado           String?   @db.Text
+  creadoEn         DateTime  @default(now()) @db.Timestamp(6)
+  actualizadoEn    DateTime  @updatedAt @db.Timestamp(6)
+
+  organizacion organizaciones @relation(fields: [id], references: [id])
 }
 
 /// Usuarios de tenant (centralizados)
@@ -45,6 +58,8 @@ model tenant_usuarios {
   permisos        Json?
   creado_en       DateTime @default(now()) @db.Timestamp(6)
   actualizado_en  DateTime @default(now()) @db.Timestamp(6)
+
+  organizacion organizaciones @relation(fields: [tenant_id], references: [id])
 }
 
 // ——— TENANT BUSINESS (dinámico via search_path) ———
@@ -68,23 +83,21 @@ model voluntarios {
 model eventos {
   id             String    @id @default(uuid()) @db.Uuid
   titulo         String
-  nombre         String? // Para mantener compatibilidad con código existente
+  nombre         String?
   descripcion    String?
   inicio         DateTime  @db.Timestamp(6)
-  fecha_inicio   DateTime  @db.Timestamp(6) // Alias para mantener compatibilidad
+  fecha_inicio   DateTime  @db.Timestamp(6)
   fin            DateTime? @db.Timestamp(6)
-  fecha_fin      DateTime? @db.Timestamp(6) // Alias para mantener compatibilidad
+  fecha_fin      DateTime? @db.Timestamp(6)
   ubicacion      String?
-  tipo           String? // presencial, virtual, hibrido
-  estado         String? // borrador, publicado, cancelado, completado
+  tipo           String?
+  estado         String?
   coordinador_id String    @db.Uuid
   capacidad      Int?
   creado_en      DateTime  @default(now())
   actualizado_en DateTime  @default(now())
   requisitos     Json?
 
-  // Relaciones
-  coordinador   usuarios        @relation("EventoCoordinador", fields: [coordinador_id], references: [id])
   inscripciones inscripciones[]
   certificados  certificados[]
 }
@@ -123,19 +136,4 @@ model certificados {
 
   voluntarios voluntarios @relation(fields: [voluntario_id], references: [id])
   eventos     eventos     @relation(fields: [evento_id], references: [id])
-}
-
-// Modelo de usuarios para esquema tenant
-model usuarios {
-  id              String   @id @default(uuid()) @db.Uuid
-  nombre          String
-  correo          String   @unique
-  hash_contrasena String
-  rol             String
-  permisos        Json?
-  creado_en       DateTime @default(now()) @db.Timestamp(6)
-  actualizado_en  DateTime @default(now()) @db.Timestamp(6)
-
-  // Relaciones (si necesarias)
-  eventos eventos[] @relation("EventoCoordinador")
 }

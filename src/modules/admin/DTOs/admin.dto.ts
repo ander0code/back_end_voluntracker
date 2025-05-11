@@ -11,11 +11,14 @@ export const organizacionSchema = z.object({
   nombre_schema: z.string().regex(/^[a-z0-9_]+$/, {
     message: 'El nombre del schema solo puede contener letras minúsculas, números y guiones bajos',
   }).optional(),
-  plan: z.enum(['basico', 'premium', 'enterprise']).optional(),
-  activo: z.boolean().optional(),
   subdominio: z.string().optional(),
   marca: z.record(z.any()).optional(),
-  estado: z.string().optional()
+  // Datos para la suscripción asociada
+  suscripcion: z.object({
+    plan: z.enum(['basico', 'premium', 'enterprise']).optional(),
+    estado: z.string().optional(),
+    fechaProximoPago: z.date().or(z.string().datetime()).optional()
+  }).optional()
 });
 
 // Schema para actualizar organización (todos los campos opcionales)
@@ -25,10 +28,11 @@ export const updateOrganizacionSchema = z.object({
   nombre_schema: z.string().regex(/^[a-z0-9_]+$/, {
     message: 'El nombre del schema solo puede contener letras minúsculas, números y guiones bajos',
   }).optional(),
-  plan: z.enum(['basico', 'premium', 'enterprise']).optional(),
-  estado: z.string().optional(),
   subdominio: z.string().optional(),
   marca: z.record(z.any()).optional(),
+  // Campos que corresponden a la suscripción pero se exponen directamente para mantener compatibilidad
+  plan: z.enum(['basico', 'premium', 'enterprise']).optional(),
+  estado: z.string().optional(),
   fecha_proximo_pago: z.date().or(z.string().datetime()).optional()
 });
 
