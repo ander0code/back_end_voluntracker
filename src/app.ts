@@ -19,10 +19,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middlewares
-setupCors(app); // Asegúrate de que CORS sea el PRIMER middleware
+setupCors(app);
+
+
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
-  contentSecurityPolicy: false // Deshabilitar CSP durante desarrollo
+  contentSecurityPolicy: false 
 }));
 app.use(compression());
 app.use(morgan('dev'));

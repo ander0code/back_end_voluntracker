@@ -296,6 +296,8 @@ router.patch('/tenants/:id', tenantController.update);
 // Rutas adicionales para actualización de planes y fechas de pago
 router.patch('/tenants/:id/plan', tenantController.updatePlan);
 router.patch('/tenants/:id/payment-date', tenantController.updatePaymentDate);
+
+
 router.delete('/tenants/:id', tenantController.delete);
 
 // Ruta para registrar administradores de plataforma (solo para admins existentes)
