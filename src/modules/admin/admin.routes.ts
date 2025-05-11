@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { tenantController, registerAdmin } from './controllers/admin.controller';
-import { requireAuth, requireRole } from '../../shared/middleware/auth.middleware';
+import { authMiddleware, requireRole } from '../../shared/middleware/auth';
 
 const router = Router();
 
 // Middleware de autenticación y autorización para todas las rutas de admin
-router.use(requireAuth);
+router.use(authMiddleware);
 router.use(requireRole('admin_plataforma'));
 
 /**

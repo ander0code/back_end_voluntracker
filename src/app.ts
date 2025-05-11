@@ -21,7 +21,8 @@ const PORT = process.env.PORT || 3000;
 // Middlewares
 setupCors(app); // Asegúrate de que CORS sea el PRIMER middleware
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: 'cross-origin' } 
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  contentSecurityPolicy: false // Deshabilitar CSP durante desarrollo
 }));
 app.use(compression());
 app.use(morgan('dev'));
