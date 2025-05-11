@@ -11,7 +11,7 @@ import { logger } from './logger';
 export const setupSwagger = (app: Application): void => {
   try {
     const specs = swaggerJsdoc(swaggerOptions);
-    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+    app.use('/swagger', swaggerUi.serve, swaggerUi.setup(specs, {
       explorer: true,
       customCss: '.swagger-ui .topbar { display: none }',
       customSiteTitle: 'VolunTracker API Documentation',
