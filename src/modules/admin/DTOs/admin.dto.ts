@@ -56,6 +56,14 @@ export const updateFechaPagoSchema = z.object({
   comentario: z.string().optional()
 });
 
+// Schema para registrar administrador de plataforma
+export const registerAdminSchema = z.object({
+  nombre: z.string().min(2, { message: 'El nombre debe tener al menos 2 caracteres' }),
+  correo: z.string().email({ message: 'Correo electrónico inválido' }),
+  contrasena: z.string().min(8, { message: 'La contraseña debe tener al menos 8 caracteres' }),
+  permisos: z.array(z.string()).or(z.record(z.boolean())).optional()
+});
+
 /**
  * DTOs - Tipos inferidos de los schemas
  */
@@ -65,3 +73,4 @@ export type CreateSuscripcionDto = z.infer<typeof suscripcionSchema>;
 export type UpdateSuscripcionDto = z.infer<typeof updateSuscripcionSchema>;
 export type UpdateOrganizacionPlanDto = z.infer<typeof updatePlanSchema>;
 export type UpdateFechaPagoDto = z.infer<typeof updateFechaPagoSchema>;
+export type RegisterAdminDto = z.infer<typeof registerAdminSchema>;

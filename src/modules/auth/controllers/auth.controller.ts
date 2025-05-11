@@ -1,29 +1,11 @@
 import { Request, Response } from 'express';
 import { logger } from '../../../shared/services/logger';
 import { AuthService } from '../services/auth.service';
-import { UserType } from '../../../shared/interfaces';
+import { 
+  loginSchema,
+  refreshTokenSchema
+} from '../DTOs';
 
-// DTOs
-interface LoginDto {
-  correo: string;
-  contrasena: string;
-}
-
-interface RegisterDto {
-  nombre: string;
-  correo: string;
-  contrasena: string;
-  permisos?: string[];
-}
-
-interface InviteDto {
-  nombre: string;
-  correo: string;
-  rol: string;
-  permisos?: string[];
-}
-
-// Instancia del servicio de autenticación
 const authService = new AuthService();
 
 /**
@@ -31,18 +13,20 @@ const authService = new AuthService();
  */
 export const login = async (req: Request, res: Response) => {
   try {
-    const { correo, contrasena } = req.body as LoginDto;
-    
-    if (!correo || !contrasena) {
+    // Validar datos de entrada
+    const result = loginSchema.safeParse(req.body);
+    if (!result.success) {
       return res.status(400).json({
         status: 'error',
-        message: 'Correo y contraseña son requeridos'
+        message: 'Datos de entrada inválidos',
+        errors: result.error.format()
       });
     }
 
+    const { correo, contrasena } = result.data;
     logger.debug(`Intento de login con credenciales - correo: ${correo}`);
 
-    // Autenticar usuario (primero como admin de plataforma, luego como usuario de tenant)
+    // Autenticar usuario
     const resultado = await authService.authenticate(correo, contrasena);
     
     logger.debug(`Login exitoso para: ${correo}, tipo: ${resultado.user.userType}`);
@@ -51,6 +35,7 @@ export const login = async (req: Request, res: Response) => {
       status: 'success',
       data: resultado
     });
+
   } catch (error: any) {
     logger.error(`Error en login: ${error.message}`);
     
@@ -69,108 +54,88 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
+// Las funciones register y invite se han eliminado ya que se manejarán en módulos separados
+
 /**
- * Registra un nuevo administrador de plataforma (solo accesible por otros admins)
+ * Refresca un token JWT utilizando un refresh token
  */
-export const register = async (req: Request, res: Response) => {
+export const refreshToken = async (req: Request, res: Response) => {
   try {
-    // Verificar que el usuario actual es un admin de plataforma
-    if (req.user?.userType !== UserType.ADMIN_PLATAFORMA) {
-      return res.status(403).json({
-        status: 'error',
-        message: 'No tiene permisos para registrar administradores'
-      });
-    }
-    
-    const { nombre, correo, contrasena, permisos } = req.body as RegisterDto;
-    
-    if (!nombre || !correo || !contrasena) {
+    // Validar datos de entrada
+    const result = refreshTokenSchema.safeParse(req.body);
+    if (!result.success) {
       return res.status(400).json({
         status: 'error',
-        message: 'Nombre, correo y contraseña son requeridos'
+        message: 'Datos de entrada inválidos',
+        errors: result.error.format()
       });
     }
+
+    const { refreshToken: token } = result.data;
     
-    const newAdmin = await authService.registerPlatformAdmin(nombre, correo, contrasena, permisos);
+    // Refrescar token
+    const tokens = await authService.refreshToken(token);
     
-    return res.status(201).json({
+    return res.status(200).json({
       status: 'success',
-      data: {
-        id: newAdmin.id,
-        nombre: newAdmin.nombre,
-        correo: newAdmin.correo
-      }
+      data: tokens
     });
   } catch (error: any) {
-    logger.error(`Error en registro de administrador: ${error.message}`);
+    logger.error(`Error en refresh token: ${error.message}`);
     
-    if (error.message === 'El correo ya existe en la base de datos') {
-      return res.status(400).json({
+    if (error.message === 'Refresh token inválido' || 
+        error.message === 'Usuario no encontrado' ||
+        error.name === 'TokenExpiredError' ||
+        error.name === 'JsonWebTokenError') {
+      return res.status(401).json({
         status: 'error',
-        message: 'El correo ya está registrado'
+        message: 'Token inválido o expirado'
       });
     }
     
     return res.status(500).json({
       status: 'error',
-      message: 'Error en el servidor al registrar el administrador'
+      message: 'Error en el servidor al procesar la solicitud'
     });
   }
 };
 
 /**
- * Genera una invitación para un usuario de tenant
+ * Obtiene el perfil del usuario autenticado
  */
-export const invite = async (req: Request, res: Response) => {
+export const getProfile = async (req: Request, res: Response) => {
   try {
-    if (!req.user || !req.user.tenantId) {
-      return res.status(403).json({
+    if (!req.user || !req.user.id || !req.user.userType) {
+      return res.status(401).json({
         status: 'error',
-        message: 'No tiene permisos para invitar usuarios a este tenant'
-      });
-    }
-
-    const tenantId = req.user.tenantId;
-    const { nombre, correo, rol, permisos } = req.body as InviteDto;
-    
-    if (!nombre || !correo || !rol) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Nombre, correo y rol son requeridos'
+        message: 'No autenticado'
       });
     }
     
-    const result = await authService.inviteTenantUser(nombre, correo, rol, tenantId, permisos);
+    const userId = req.user.id;
+    const userType = req.user.userType;
     
-    return res.status(201).json({
+    // Obtener perfil de usuario
+    const profile = await authService.getUserProfile(userId, userType);
+    
+    return res.status(200).json({
       status: 'success',
-      data: {
-        id: result.id,
-        correo: result.correo,
-        tenant: result.tenant,
-        tempPassword: result.tempPassword // Solo para desarrollo, en producción no devolver esto
-      }
+      data: profile
     });
   } catch (error: any) {
-    logger.error(`Error al invitar usuario: ${error.message}`);
+    logger.error(`Error al obtener perfil: ${error.message}`);
     
-    if (error.message.includes('Rol inválido')) {
-      return res.status(400).json({
+    if (error.message === 'Administrador no encontrado' || 
+        error.message === 'Usuario no encontrado') {
+      return res.status(404).json({
         status: 'error',
-        message: error.message
-      });
-    }
-    
-    if (error.message === 'El correo ya existe en el sistema') {
-      return res.status(400).json({
-        status: 'error',
-        message: 'El correo ya está registrado'
+        message: 'Usuario no encontrado'
       });
     }
     
     return res.status(500).json({
       status: 'error',
-      message: 'Error en el servidor al invitar al usuario'
+      message: 'Error en el servidor al obtener el perfil'
     });
   }
 };

@@ -1,38 +1,180 @@
 import { Router } from 'express';
-import { login, register, invite } from './controllers/auth.controller';
-import { authMiddleware, requireRole, requirePermission } from '../../shared/middleware/auth';
-import { UserType } from '../../shared/interfaces';
+import { login, refreshToken, getProfile } from './controllers/auth.controller';
+import { authMiddleware } from '../../shared/middleware/auth';
 
 const router = Router();
 
 /**
- * @route   POST /api/auth/login
- * @desc    Autenticar un usuario (admin plataforma o usuario tenant)
- * @access  Público
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Autenticar un usuario
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - correo
+ *               - contrasena
+ *             properties:
+ *               correo:
+ *                 type: string
+ *                 format: email
+ *                 description: Correo electrónico del usuario
+ *               contrasena:
+ *                 type: string
+ *                 format: password
+ *                 description: Contraseña del usuario
+ *     responses:
+ *       200:
+ *         description: Login exitoso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     token:
+ *                       type: string
+ *                       description: JWT token para autenticación
+ *                     user:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                           format: uuid
+ *                         nombre:
+ *                           type: string
+ *                         correo:
+ *                           type: string
+ *                           format: email
+ *                         userType:
+ *                           type: string
+ *                           enum: [admin_plataforma, admin_tenant, usuario_tenant]
+ *       400:
+ *         description: Datos de entrada inválidos
+ *       401:
+ *         description: Credenciales incorrectas
+ *       500:
+ *         description: Error del servidor
  */
 router.post('/login', login);
 
 /**
- * @route   POST /api/auth/register
- * @desc    Registrar un nuevo administrador de plataforma
- * @access  Solo para administradores de plataforma con permisos 'manage_platform_admins'
+ * @swagger
+ * /auth/refresh:
+ *   post:
+ *     summary: Refrescar token JWT usando refresh token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: Token de refresco obtenido en el login
+ *     responses:
+ *       200:
+ *         description: Tokens renovados correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     token:
+ *                       type: string
+ *                       description: Nuevo JWT token para autenticación
+ *                     refreshToken:
+ *                       type: string
+ *                       description: Nuevo refresh token
+ *       400:
+ *         description: Datos de entrada inválidos
+ *       401:
+ *         description: Token de refresco inválido o expirado
+ *       500:
+ *         description: Error del servidor
  */
-router.post('/register', 
-  authMiddleware, 
-  requireRole(UserType.ADMIN_PLATAFORMA),
-  requirePermission('manage_platform_admins'), 
-  register
-);
+router.post('/refresh', refreshToken);
 
 /**
- * @route   POST /api/auth/invite
- * @desc    Invitar a un usuario a un tenant
- * @access  Solo para administradores de plataforma o admins de tenant
+ * @swagger
+ * /auth/profile:
+ *   get:
+ *     summary: Obtener perfil del usuario autenticado
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Perfil obtenido correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       format: uuid
+ *                     nombre:
+ *                       type: string
+ *                     correo:
+ *                       type: string
+ *                       format: email
+ *                     userType:
+ *                       type: string
+ *                       enum: [admin_plataforma, admin_tenant, usuario_tenant]
+ *                     permisos:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                     creado_en:
+ *                       type: string
+ *                       format: date-time
+ *                     actualizado_en:
+ *                       type: string
+ *                       format: date-time
+ *                     tenantId:
+ *                       type: string
+ *                       format: uuid
+ *                       description: Solo para usuarios de tenant
+ *                     tenantNombre:
+ *                       type: string
+ *                       description: Solo para usuarios de tenant
+ *                     rol:
+ *                       type: string
+ *                       description: Solo para usuarios de tenant
+ *       401:
+ *         description: No autenticado
+ *       404:
+ *         description: Usuario no encontrado
+ *       500:
+ *         description: Error del servidor
  */
-router.post('/invite', 
-  authMiddleware, 
-  requireRole([UserType.ADMIN_PLATAFORMA, 'admin']),
-  invite
-);
+router.get('/profile', authMiddleware, getProfile);
 
 export default router;

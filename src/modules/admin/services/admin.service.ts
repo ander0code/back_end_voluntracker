@@ -5,9 +5,11 @@ import {
   CreateOrganizacionDto, 
   UpdateOrganizacionDto,
   UpdateOrganizacionPlanDto,
-  UpdateFechaPagoDto
+  UpdateFechaPagoDto,
+  RegisterAdminDto
 } from '../DTOs/admin.dto';
 import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
 
 export class AdminService {
   /**
@@ -297,7 +299,6 @@ export class AdminService {
       throw new AppError('Error al actualizar fecha de próximo pago', 500);
     }
   }
-
   /**
    * Listar todos los tenants con información resumida (para dropdown)
    */
@@ -320,6 +321,64 @@ export class AdminService {
     } catch (error) {
       logger.error(`Error al obtener lista de tenants: ${error}`);
       throw new AppError('Error al obtener lista de tenants', 500);
+    }
+  }
+  
+  /**
+   * Registrar un nuevo administrador de plataforma
+   */
+  async registerPlatformAdmin(data: RegisterAdminDto) {
+    try {
+      // Verificar si ya existe un admin con el correo dado
+      const existingAdmin = await prisma.administradores.findUnique({
+        where: { correo: data.correo }
+      });
+
+      if (existingAdmin) {
+        throw new AppError('El correo ya existe en la base de datos', 400);
+      }
+
+      // Normalizar permisos
+      let permisosNormalizados: string[] = [];
+      
+      if (data.permisos) {
+        if (Array.isArray(data.permisos)) {
+          permisosNormalizados = data.permisos;
+        } else if (typeof data.permisos === 'object') {
+          permisosNormalizados = Object.entries(data.permisos)
+            .filter(([_, value]) => value === true)
+            .map(([key, _]) => key);
+        }
+      }
+
+      // Hashear contraseña
+      const saltRounds = 10;
+      const hash_contrasena = await bcrypt.hash(data.contrasena, saltRounds);
+
+      // Crear nuevo admin
+      const newAdmin = await prisma.administradores.create({
+        data: {
+          id: uuidv4(),
+          nombre: data.nombre,
+          correo: data.correo,
+          hash_contrasena,
+          permisos: permisosNormalizados
+        },
+        select: {
+          id: true,
+          nombre: true,
+          correo: true,
+          permisos: true,
+          creado_en: true
+        }
+      });
+
+      logger.info(`Nuevo administrador de plataforma creado: ${newAdmin.id} - ${newAdmin.correo}`);
+      return newAdmin;
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      logger.error(`Error al registrar administrador: ${error}`);
+      throw new AppError('Error al registrar administrador', 500);
     }
   }
 }
