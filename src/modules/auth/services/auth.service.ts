@@ -1,34 +1,21 @@
-import { v4 as uuidv4 } from 'uuid';
-import bcrypt from 'bcryptjs'; 
-import jwt, { SignOptions } from 'jsonwebtoken';
 import prisma from '../../../shared/services/db.service';
+import { config } from '../../../config';
 import { logger } from '../../../shared/services/logger';
+import bcrypt from 'bcryptjs';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { 
   AuthResult, 
   UserType, 
+  PlatformAdminPermission, 
   TenantRole, 
-  TenantPermission, 
-  PlatformAdminPermission,
+  TenantPermission,
   TENANT_ROLE_PERMISSIONS
-} from '../../../shared/interfaces';
-import { config } from '../../../config';
+} from '../interfaces/auth.interfaces';
+
 
 export class AuthService {
-  private readonly JWT_SECRET: string;
-  private readonly JWT_EXPIRES_IN: string;
-  
-  constructor() {
-    // Verificación de variables de entorno críticas
-    if (!config.jwt.secret) {
-      throw new Error('JWT_SECRET no está definido en variables de entorno');
-    }
-    this.JWT_SECRET = config.jwt.secret;
-    this.JWT_EXPIRES_IN = config.jwt.expiresIn || '1d';
-  }
-
   /**
-   * Método principal de autenticación centralizada
-   * Busca primero en administradores, y luego en tenant_usuarios
+   * Autenticar un usuario (admin plataforma o usuario tenant)
    */
   async authenticate(correo: string, contrasena: string): Promise<AuthResult> {
     try {
@@ -105,25 +92,31 @@ export class AuthService {
       // Verificar y normalizar permisos
       const permisos = this.normalizePlatformAdminPermissions(admin.permisos);
 
-      logger.debug(`Generando token JWT para administrador: ${correo}`);
+      logger.debug(`Generando token JWT para administrador: ${correo}`);      // Generar token JWT con tipado correcto
+      const jwtPayload = { 
+        id: admin.id,
+        nombre: admin.nombre,
+        correo: admin.correo,
+        userType: UserType.ADMIN_PLATAFORMA,
+        permisos 
+      };      const jwtOptions: SignOptions = { 
+        expiresIn: `${config.jwt.expiresIn}` as any
+      };
       
-      // Generar token JWT
       const token = jwt.sign(
-        { 
-          id: admin.id,
-          nombre: admin.nombre,
-          correo: admin.correo,
-          userType: UserType.ADMIN_PLATAFORMA,
-          permisos 
-        },
-        this.JWT_SECRET,
-        { expiresIn: this.JWT_EXPIRES_IN } as SignOptions
+        jwtPayload,
+        process.env.JWT_SECRET || 'default_secret_key',
+        jwtOptions
       );
+
+      // Generar refresh token
+      const refreshToken = this.generateRefreshToken(admin.id);
 
       logger.debug(`Token generado para administrador: ${correo}`);
       
       return {
         token,
+        refreshToken,
         user: {
           id: admin.id,
           nombre: admin.nombre,
@@ -189,33 +182,41 @@ export class AuthService {
       const permisos = this.normalizeTenantUserPermissions(rol, usuario.permisos);
 
       logger.debug(`Generando token JWT para usuario: ${correo}`);
+        // Generar token JWT
+      const jwtPayload = {
+        id: usuario.id,
+        nombre: usuario.nombre,
+        correo: usuario.correo,
+        userType: UserType.USUARIO_TENANT,
+        tenantId: usuario.tenant_id,
+        tenantNombre: tenantInfo.nombre,
+        schemaName: tenantInfo.nombre_esquema,
+        rol: usuario.rol,
+        permisos
+      };      
       
-      // Generar token JWT
-      const token = jwt.sign(
-        { 
-          id: usuario.id,
-          nombre: usuario.nombre,
-          correo: usuario.correo,
-          userType: UserType.TENANT_USUARIO,
-          tenantId: usuario.tenant_id,
-          tenantNombre: tenantInfo.nombre,
-          schemaName: tenantInfo.nombre_esquema,
-          rol: usuario.rol,
-          permisos 
-        },
-        this.JWT_SECRET,
-        { expiresIn: this.JWT_EXPIRES_IN } as SignOptions
+      const jwtOptions: SignOptions = { 
+        expiresIn: config.jwt.expiresIn as any
+      };
+        const token = jwt.sign(
+        jwtPayload,
+        process.env.JWT_SECRET || 'default_secret_key',
+        jwtOptions
       );
+
+      // Generar refresh token
+      const refreshToken = this.generateRefreshToken(usuario.id);
 
       logger.debug(`Token generado para usuario de tenant: ${correo}`);
       
       return {
         token,
+        refreshToken,
         user: {
           id: usuario.id,
           nombre: usuario.nombre,
           correo: usuario.correo,
-          userType: UserType.TENANT_USUARIO,
+          userType: UserType.USUARIO_TENANT,
           tenantId: usuario.tenant_id,
           tenantNombre: tenantInfo.nombre,
           schemaName: tenantInfo.nombre_esquema,
@@ -258,8 +259,7 @@ export class AuthService {
 
   /**
    * Normaliza y combina los permisos basados en rol con permisos específicos
-   */
-  private normalizeTenantUserPermissions(rol: TenantRole, permisosEspecificos: unknown): string[] {
+   */  private normalizeTenantUserPermissions(rol: TenantRole, permisosEspecificos: unknown): string[] {
     // Obtener permisos base según el rol
     let permisos: string[] = [];
     
@@ -303,107 +303,8 @@ export class AuthService {
   }
 
   /**
-   * Registrar un nuevo administrador de plataforma
-   */
-  async registerPlatformAdmin(nombre: string, correo: string, contrasena: string, permisos?: any) {
-    // Verificar si ya existe un admin con el correo dado
-    const existingAdmin = await prisma.administradores.findUnique({
-      where: { correo }
-    });
-
-    if (existingAdmin) {
-      throw new Error('El correo ya existe en la base de datos');
-    }
-
-    // Normalizar permisos
-    const permisosNormalizados = this.normalizePlatformAdminPermissions(permisos);
-
-    // Hashear contraseña
-    const saltRounds = 10;
-    const hash_contrasena = await bcrypt.hash(contrasena, saltRounds);
-
-    // Crear nuevo admin
-    const newAdmin = await prisma.administradores.create({
-      data: {
-        id: uuidv4(),
-        nombre,
-        correo,
-        hash_contrasena,
-        permisos: permisosNormalizados
-      }
-    });
-
-    return newAdmin;
-  }
-
-  /**
-   * Invitar a un usuario de tenant
-   */
-  async inviteTenantUser(nombre: string, correo: string, rol: string, tenantId: string, permisos?: any) {
-    try {
-      logger.debug(`Invitando usuario a tenant ${tenantId}: ${correo}, rol: ${rol}`);
-      
-      // Verificar si el tenant existe
-      const tenant = await prisma.organizaciones.findUnique({
-        where: { id: tenantId }
-      });
-      
-      if (!tenant) {
-        throw new Error('Organización no encontrada');
-      }
-
-      // Verificar si el rol es válido
-      if (!Object.values(TenantRole).includes(rol as TenantRole)) {
-        throw new Error(`Rol inválido: ${rol}. Roles válidos: ${Object.values(TenantRole).join(', ')}`);
-      }
-
-      // Verificar si ya existe un usuario con el correo
-      const existingUser = await prisma.tenant_usuarios.findUnique({
-        where: { correo }
-      });
-      
-      if (existingUser) {
-        throw new Error('El correo ya existe en el sistema');
-      }
-
-      // Generar contraseña temporal
-      const tempPassword = this.generateTemporaryPassword();
-      const saltRounds = 10;
-      const hash_contrasena = await bcrypt.hash(tempPassword, saltRounds);
-
-      // Normalizar permisos según el rol y permisos específicos
-      const permisosNormalizados = this.normalizeTenantUserPermissions(rol as TenantRole, permisos);
-
-      // Crear usuario en tenant_usuarios (ahora centralizado)
-      const newUser = await prisma.tenant_usuarios.create({
-        data: {
-          id: uuidv4(),
-          tenant_id: tenantId,
-          nombre,
-          correo,
-          hash_contrasena,
-          rol,
-          permisos: permisosNormalizados
-        }
-      });
-
-      // En una aplicación real, aquí se enviaría un email con la contraseña temporal
-      logger.info(`Usuario invitado a la organización ${tenant.nombre} con contraseña temporal: ${tempPassword}`);
-
-      return {
-        id: newUser.id,
-        correo: newUser.correo,
-        tenant: tenant.nombre,
-        tempPassword // Solo para desarrollo, en producción no devolver esto
-      };
-    } catch (error) {
-      logger.error(`Error al invitar usuario: ${error}`);
-      throw error;
-    }
-  }
-
-  /**
    * Generar contraseña temporal
+   * Esta función de utilidad permanece ya que puede ser útil en otros contextos
    */
   private generateTemporaryPassword(length = 10): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -434,5 +335,201 @@ export class AuthService {
    */
   hasAllPermissions(userPermisos: string[], requiredPermissions: string[]): boolean {
     return requiredPermissions.every(perm => userPermisos.includes(perm));
+  }
+
+  /**
+   * Genera un nuevo refresh token para un usuario
+   * @param userId - ID del usuario
+   * @returns String con el refresh token
+   */
+  private generateRefreshToken(userId: string): string {
+    return jwt.sign(
+      { id: userId, type: 'refresh' },
+      config.jwt.secret,
+      { expiresIn: '7d' } // Los refresh tokens duran 7 días
+    );
+  }
+  
+  /**
+   * Refresca un token JWT utilizando un refresh token
+   * @param refreshToken - Token de refresco válido
+   * @returns Nuevos tokens (access y refresh)
+   */
+  async refreshToken(refreshToken: string): Promise<{ token: string, refreshToken: string }> {
+    try {
+      // Verificar validez del refresh token
+      const decoded = jwt.verify(refreshToken, config.jwt.secret) as any;
+      
+      if (!decoded || !decoded.id || decoded.type !== 'refresh') {
+        throw new Error('Refresh token inválido');
+      }
+      
+      // Buscar en ambos tipos de usuarios (admin platform o tenant user)
+      let user: any = null;
+      
+      // Primero buscar en administradores
+      user = await prisma.administradores.findUnique({
+        where: { id: decoded.id }
+      });
+      
+      let userPayload: any;
+      let userType: UserType;
+      
+      if (user) {
+        // Es un administrador de plataforma
+        userType = UserType.ADMIN_PLATAFORMA;
+        const permisos = this.normalizePlatformAdminPermissions(user.permisos);
+        
+        userPayload = {
+          id: user.id,
+          nombre: user.nombre,
+          correo: user.correo,
+          userType,
+          permisos
+        };
+      } else {
+        // Buscar en usuarios de tenant
+        user = await prisma.tenant_usuarios.findUnique({
+          where: { id: decoded.id }
+        });
+        
+        if (!user) {
+          throw new Error('Usuario no encontrado');
+        }
+        
+        // Es un usuario de tenant
+        const tenantInfo = await prisma.organizaciones.findUnique({
+          where: { id: user.tenant_id },
+          select: {
+            id: true,
+            nombre: true, 
+            nombre_esquema: true
+          }
+        });
+        
+        if (!tenantInfo) {
+          throw new Error('Organización no encontrada');
+        }
+        
+        userType = UserType.USUARIO_TENANT;
+        const rol = user.rol as TenantRole;
+        const permisos = this.normalizeTenantUserPermissions(rol, user.permisos);
+        
+        userPayload = {
+          id: user.id,
+          nombre: user.nombre,
+          correo: user.correo,
+          userType,
+          tenantId: user.tenant_id,
+          tenantNombre: tenantInfo.nombre,
+          schemaName: tenantInfo.nombre_esquema,
+          rol: user.rol,
+          permisos
+        };
+      }
+      
+      // Generar nuevos tokens
+      const newToken = jwt.sign(
+        userPayload,
+        config.jwt.secret,
+        { expiresIn: config.jwt.expiresIn as any }
+      );
+      
+      const newRefreshToken = this.generateRefreshToken(user.id);
+      
+      return {
+        token: newToken,
+        refreshToken: newRefreshToken
+      };
+    } catch (error: any) {
+      logger.error(`Error al refrescar token: ${error.message}`);
+      throw error;
+    }
+  }
+  
+  /**
+   * Obtiene el perfil de un usuario
+   * @param userId - ID del usuario
+   * @param userType - Tipo de usuario
+   * @returns Datos del perfil del usuario
+   */
+  async getUserProfile(userId: string, userType: UserType): Promise<any> {
+    try {
+      if (userType === UserType.ADMIN_PLATAFORMA) {
+        // Buscar admin platform
+        const admin = await prisma.administradores.findUnique({
+          where: { id: userId },
+          select: {
+            id: true,
+            nombre: true,
+            correo: true,
+            permisos: true,
+            creado_en: true,
+            actualizado_en: true
+          }
+        });
+        
+        if (!admin) {
+          throw new Error('Administrador no encontrado');
+        }
+        
+        return {
+          ...admin,
+          userType: UserType.ADMIN_PLATAFORMA,
+          permisos: this.normalizePlatformAdminPermissions(admin.permisos)
+        };      } else if (userType === UserType.USUARIO_TENANT) {
+        // Buscar tenant user
+        const user = await prisma.tenant_usuarios.findUnique({
+          where: { id: userId },
+          select: {
+            id: true,
+            nombre: true,
+            correo: true,
+            rol: true,
+            permisos: true,
+            creado_en: true,
+            actualizado_en: true,
+            tenant_id: true
+          }
+        });
+        
+        if (!user) {
+          throw new Error('Usuario no encontrado');
+        }
+        
+        // Obtener la información del tenant en una consulta separada
+        const tenantInfo = await prisma.organizaciones.findUnique({
+          where: { id: user.tenant_id },
+          select: {
+            id: true,
+            nombre: true,
+            nombre_esquema: true
+          }
+        });
+        
+        if (!tenantInfo) {
+          throw new Error('Organización no encontrada');
+        }
+        
+        return {
+          id: user.id,
+          nombre: user.nombre,
+          correo: user.correo,
+          userType: UserType.USUARIO_TENANT,
+          rol: user.rol,
+          permisos: this.normalizeTenantUserPermissions(user.rol as TenantRole, user.permisos),
+          tenantId: user.tenant_id,
+          tenantNombre: tenantInfo.nombre,
+          schemaName: tenantInfo.nombre_esquema,
+          creado_en: user.creado_en,
+          actualizado_en: user.actualizado_en
+        };
+      }
+      
+      throw new Error('Tipo de usuario no soportado');
+    } catch (error: any) {
+      logger.error(`Error al obtener perfil de usuario: ${error.message}`);
+      throw error;
+    }
   }
 }

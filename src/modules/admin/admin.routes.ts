@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { organizacionController, getAllTenants } from './controllers/admin.controller';
+import { organizacionController, getAllTenants, registerAdmin } from './controllers/admin.controller';
 import { requireAuth, requireRole } from '../../shared/middleware/auth.middleware';
 
 const router = Router();
@@ -19,5 +19,8 @@ router.delete('/organizaciones/:id', organizacionController.delete);
 
 // Ruta pública para obtener lista de tenants (puede requerir autenticación dependiendo del caso)
 router.get('/tenants', getAllTenants);
+
+// Ruta para registrar administradores de plataforma (solo para admins existentes)
+router.post('/register', registerAdmin);
 
 export default router;

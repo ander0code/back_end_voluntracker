@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { AdminService } from '../services/admin.service';
 import { logger } from '../../../shared/services/logger';
 import { AppError } from '../../../shared/middleware/errorHandler';
+import { registerAdminSchema } from '../DTOs/admin.dto';
 
 // Instancia del servicio
 const adminService = new AdminService();
@@ -201,6 +202,52 @@ export const getAllTenants = async (req: Request, res: Response) => {
     return res.status(statusCode).json({
       status: 'error',
       message: error.message || 'Error al listar tenants'
+    });
+  }
+};
+
+/**
+ * Controlador para registrar un nuevo administrador de plataforma
+ */
+export const registerAdmin = async (req: Request, res: Response) => {
+  try {
+    // Validar datos de entrada
+    const result = registerAdminSchema.safeParse(req.body);
+    if (!result.success) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Datos de entrada inválidos',
+        errors: result.error.format()
+      });
+    }
+    
+    // Registrar administrador
+    const newAdmin = await adminService.registerPlatformAdmin(result.data);
+    
+    return res.status(201).json({
+      status: 'success',
+      data: {
+        id: newAdmin.id,
+        nombre: newAdmin.nombre,
+        correo: newAdmin.correo,
+        permisos: newAdmin.permisos,
+        creado_en: newAdmin.creado_en
+      },
+      message: 'Administrador registrado exitosamente'
+    });
+  } catch (error: any) {
+    logger.error(`Error en registro de administrador: ${error.message}`);
+    
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json({
+        status: 'error',
+        message: error.message
+      });
+    }
+    
+    return res.status(500).json({
+      status: 'error',
+      message: 'Error en el servidor al registrar el administrador'
     });
   }
 };

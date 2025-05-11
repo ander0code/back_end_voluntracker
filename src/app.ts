@@ -7,6 +7,7 @@ import { config } from 'dotenv';
 import apiRoutes from './routes';
 import { logger } from './shared/services/logger';
 import { notFoundHandler, globalErrorHandler } from './shared/middleware/errorHandler';
+import { setupSwagger } from './shared/services/swagger.service';
 
 // Cargar variables de entorno
 config();
@@ -24,6 +25,9 @@ app.use(compression());
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Configurar Swagger
+setupSwagger(app);
 
 // Ruta base API
 app.use('/api', apiRoutes);

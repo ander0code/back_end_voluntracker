@@ -11,5 +11,4 @@ router.use('/auth', authRoutes);
 // Montar las rutas de administración en /api/admin
 router.use('/admin', adminRoutes);
 
-// Montar las rutas de tenant en /api/tenant
 export default router;
