@@ -37,10 +37,6 @@ const swaggerDefinition = {
       description: 'Administración de organizaciones (tenants) y configuración de la plataforma',
     },
     {
-      name: 'Volunteers',
-      description: 'Gestión de voluntarios',
-    },
-    {
       name: 'Events',
       description: 'Gestión de eventos',
     },
