@@ -1,5 +1,4 @@
 import express from 'express';
-import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
@@ -8,6 +7,7 @@ import apiRoutes from './routes';
 import { logger } from './shared/services/logger';
 import { notFoundHandler, globalErrorHandler } from './shared/middleware/errorHandler';
 import { setupSwagger } from './shared/services/swagger.service';
+import { setupCors } from './shared/services/cors.service';
 
 // Cargar variables de entorno
 config();
@@ -19,7 +19,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middlewares
-app.use(cors());
+setupCors(app);
 app.use(helmet());
 app.use(compression());
 app.use(morgan('dev'));
