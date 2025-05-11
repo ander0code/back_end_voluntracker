@@ -1,4 +1,3 @@
-// Importamos PrismaClient desde la ruta donde se generó
 import { PrismaClient } from '../../../src/generated/prisma';
 import { logger } from './logger';
 
@@ -35,5 +34,4 @@ prisma.$on('query', (e: any) => {
   }
 });
 
-// Exportarlo como default para facilitar su importación en otros archivos
 export default prisma;
