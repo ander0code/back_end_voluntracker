@@ -243,7 +243,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\USUARIO\\Desktop\\back_end_voluntracker\\src\\generated\\prisma",
+      "value": "C:\\Users\\AUTONOMA\\Desktop\\back_end_voluntracker\\src\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -259,11 +259,11 @@ const config = {
     "previewFeatures": [
       "multiSchema"
     ],
-    "sourceFilePath": "C:\\Users\\USUARIO\\Desktop\\back_end_voluntracker\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\AUTONOMA\\Desktop\\back_end_voluntracker\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../../../.env",
+    "rootEnvPath": null,
     "schemaEnvPath": "../../../.env"
   },
   "relativePath": "../../../prisma",

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAuth, requireRole } from '../../shared/middleware/auth.middleware';
+import { authMiddleware, requireRole } from '../../shared/middleware/auth';
 import { voluntarioController } from './controllers/voluntarios.controller';
 
 
@@ -7,7 +7,7 @@ import { voluntarioController } from './controllers/voluntarios.controller';
 const router = Router();
 
 // Middleware de autenticación y autorización para todas las rutas de voluntarios
-router.use(requireAuth);
+router.use(authMiddleware);
 router.use(requireRole('admin_plataforma'));
 
 /**
