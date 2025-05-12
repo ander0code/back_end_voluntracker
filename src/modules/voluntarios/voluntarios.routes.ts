@@ -2,11 +2,13 @@ import { Router } from 'express';
 import { requireAuth, requireRole } from '../../shared/middleware/auth.middleware';
 import { voluntarioController } from './controllers/voluntarios.controller';
 
+
+
 const router = Router();
 
 // Middleware de autenticación y autorización para todas las rutas de voluntarios
 router.use(requireAuth);
-router.use(requireRole('coordinador'));
+router.use(requireRole('admin_plataforma'));
 
 /**
  * @swagger
@@ -21,6 +23,8 @@ router.use(requireRole('coordinador'));
  *   get:
  *     summary: Obtener todos los voluntarios
  *     tags: [Voluntarios]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: schema
@@ -36,7 +40,7 @@ router.use(requireRole('coordinador'));
  *       500:
  *         description: Error del servidor
  */
-router.get('/voluntarios', voluntarioController.obtenerTodos);
+router.get('/', voluntarioController.obtenerTodos);
 
 /**
  * @swagger
@@ -44,6 +48,8 @@ router.get('/voluntarios', voluntarioController.obtenerTodos);
  *   post:
  *     summary: Crear un nuevo voluntario
  *     tags: [Voluntarios]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: schema
@@ -83,6 +89,8 @@ router.post('/voluntarios', voluntarioController.crearVoluntario);
  *   patch:
  *     summary: Actualizar un voluntario por ID
  *     tags: [Voluntarios]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -121,6 +129,8 @@ router.patch('/voluntarios/:id', voluntarioController.actualizarVoluntario);
  *   delete:
  *     summary: Eliminar un voluntario por ID
  *     tags: [Voluntarios]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -148,6 +158,8 @@ router.delete('/voluntarios/:id', voluntarioController.eliminarVoluntario);
  *   get:
  *     summary: Obtener historial de actividades de un voluntario
  *     tags: [Voluntarios]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -175,6 +187,8 @@ router.get('/voluntarios/:id/history', voluntarioController.historialVoluntario)
  *   get:
  *     summary: Obtener certificados del voluntario
  *     tags: [Voluntarios]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -202,6 +216,8 @@ router.get('/voluntarios/:id/certificates', voluntarioController.certificadosVol
  *   get:
  *     summary: Exportar lista de voluntarios en formato Excel
  *     tags: [Voluntarios]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: schema

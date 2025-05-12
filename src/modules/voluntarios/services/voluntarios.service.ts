@@ -1,17 +1,18 @@
 import prisma from '../../../shared/services/db.service';
 import { CrearVoluntarioDTO } from '../DTOs/crearVoluntario.dto';
 import { ActualizarVoluntarioDTO } from '../DTOs/actualizarVoluntario.dto';
+import { logger } from '../../../shared/services/logger';
 //import ExcelJS from 'exceljs';
 
 export const setSearchPath = async (schema: string) => {
+  logger.debug(`Configurando search_path a: ${schema}`);
   await prisma.$executeRawUnsafe(`SET search_path TO ${schema}`);
 };
 
 export const obtenerTodos = async (schema: string) => {
   await setSearchPath(schema);
-  return prisma.voluntarios.findMany();
+  return prisma.$queryRawUnsafe(`SELECT * FROM "${schema}".voluntarios`);
 };
-
 export const crearVoluntario = async (schema: string, data: CrearVoluntarioDTO) => {
   await setSearchPath(schema);
   return prisma.voluntarios.create({ data });

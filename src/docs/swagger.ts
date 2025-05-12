@@ -52,6 +52,10 @@ const swaggerDefinition = {
       name: 'Certificados',
       description: 'Generación y gestión de certificados',
     },
+    {
+      name: 'Voluntarios',
+      description: 'Gestión de voluntarios',
+    }
   ],
   components: {
     securitySchemes: {
