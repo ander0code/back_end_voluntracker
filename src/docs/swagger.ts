@@ -37,10 +37,6 @@ const swaggerDefinition = {
       description: 'Administración de organizaciones (tenants) y configuración de la plataforma',
     },
     {
-      name: 'Volunteers',
-      description: 'Gestión de voluntarios',
-    },
-    {
       name: 'Events',
       description: 'Gestión de eventos',
     },
@@ -56,6 +52,10 @@ const swaggerDefinition = {
       name: 'Certificados',
       description: 'Generación y gestión de certificados',
     },
+    {
+      name: 'Voluntarios',
+      description: 'Gestión de voluntarios',
+    }
   ],
   components: {
     securitySchemes: {
