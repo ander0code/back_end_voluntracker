@@ -35,16 +35,16 @@ model organizaciones {
 }
 
 model suscripciones {
-  id               String    @id @default(uuid()) @db.Uuid
-  organizacionId   String    @db.Uuid
-  plan             String?   @db.Text
-  fechaInicio      DateTime? @db.Date
-  fechaProximoPago DateTime? @db.Date
-  estado           String?   @db.Text
-  creadoEn         DateTime  @default(now()) @db.Timestamp(6)
-  actualizadoEn    DateTime  @updatedAt @db.Timestamp(6)
+  id                 String    @id @default(uuid()) @db.Uuid
+  organizacion_id    String    @db.Uuid
+  plan               String?   @db.Text
+  fecha_inicio       DateTime? @db.Date
+  fecha_proximo_pago DateTime? @db.Date
+  estado             String?   @db.Text
+  creado_en          DateTime  @default(now()) @db.Timestamp(6)
+  actualizado_en     DateTime  @updatedAt @db.Timestamp(6)
 
-  organizacion organizaciones @relation(fields: [id], references: [id])
+  organizacion organizaciones @relation(fields: [organizacion_id], references: [id])
 }
 
 /// Usuarios de tenant (centralizados)

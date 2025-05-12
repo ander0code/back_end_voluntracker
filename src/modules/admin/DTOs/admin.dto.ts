@@ -17,7 +17,7 @@ export const organizacionSchema = z.object({
   suscripcion: z.object({
     plan: z.enum(['basico', 'premium', 'enterprise']).optional(),
     estado: z.string().optional(),
-    fechaProximoPago: z.date().or(z.string().datetime()).optional()
+    fecha_proximo_pago: z.date().or(z.string().datetime()).optional()
   }).optional()
 });
 
@@ -50,8 +50,7 @@ export const updateSuscripcionSchema = suscripcionSchema.partial().omit({ organi
 
 // Schema para actualizar el plan de una organización
 export const updatePlanSchema = z.object({
-  plan: z.enum(['basico', 'premium', 'enterprise']),
-  comentario: z.string().optional()
+  plan: z.enum(['basico', 'premium', 'enterprise'])
 });
 
 // Schema para actualizar la fecha de próximo pago
@@ -65,7 +64,61 @@ export const registerAdminSchema = z.object({
   nombre: z.string().min(2, { message: 'El nombre debe tener al menos 2 caracteres' }),
   correo: z.string().email({ message: 'Correo electrónico inválido' }),
   contrasena: z.string().min(8, { message: 'La contraseña debe tener al menos 8 caracteres' }),
-  permisos: z.array(z.string()).or(z.record(z.boolean())).optional()
+  permisos: z.array(z.string()).or(z.record(z.boolean())).optional(),
+  rol: z.enum(['admin', 'coordinador', 'voluntario']).optional().default('admin')
+});
+
+// Schema para registrar administrador de tenant
+export const registerTenantAdminSchema = z.object({
+  nombre: z.string().min(2, { message: 'El nombre debe tener al menos 2 caracteres' }),
+  correo: z.string().email({ message: 'Correo electrónico inválido' }),
+  contrasena: z.string().min(8, { message: 'La contraseña debe tener al menos 8 caracteres' }),
+  permisos: z.array(z.string()).optional(),
+  rol: z.enum(['admin', 'coordinador', 'voluntario']).default('admin')
+});
+
+// Schema para actualizar el estado de una organización
+export const updateStatusSchema = z.object({
+  estado: z.enum(['activo', 'suspendido', 'cancelado']),
+});
+
+// Schema para consulta de uso de API
+export const usageQuerySchema = z.object({
+  desde: z.date().or(z.string().datetime()).optional(),
+  hasta: z.date().or(z.string().datetime()).optional()
+});
+
+// Schema para consulta de métricas
+export const metricsQuerySchema = z.object({
+  desde: z.date().or(z.string().datetime()).optional(),
+  hasta: z.date().or(z.string().datetime()).optional(),
+  tipo: z.enum(['latencia', 'errores', 'todos']).optional().default('todos')
+});
+
+// Schema para consulta de facturas
+export const invoicesQuerySchema = z.object({
+  desde: z.date().or(z.string().datetime()).optional(),
+  hasta: z.date().or(z.string().datetime()).optional(),
+  estado: z.enum(['pagada', 'pendiente', 'vencida', 'todas']).optional().default('todas')
+});
+
+// Schema para información del sistema
+export const healthSchema = z.object({
+  db_status: z.boolean(),
+  api_latency: z.number(),
+  queue_size: z.number(),
+  memory_usage: z.number(),
+  cpu_usage: z.number(),
+  uptime: z.number()
+});
+
+// Schema para enviar factura
+export const sendInvoiceSchema = z.object({
+  method: z.enum(['email', 'pdf', 'both']).default('email'),
+  destinatario: z.string().email().optional(),
+  mensaje: z.string().optional(),
+  cc: z.array(z.string().email()).optional(),
+  incluirAdjuntos: z.boolean().optional().default(true)
 });
 
 /**
@@ -78,3 +131,10 @@ export type UpdateSuscripcionDto = z.infer<typeof updateSuscripcionSchema>;
 export type UpdateOrganizacionPlanDto = z.infer<typeof updatePlanSchema>;
 export type UpdateFechaPagoDto = z.infer<typeof updateFechaPagoSchema>;
 export type RegisterAdminDto = z.infer<typeof registerAdminSchema>;
+export type RegisterTenantAdminDto = z.infer<typeof registerTenantAdminSchema>;
+export type UpdateStatusDto = z.infer<typeof updateStatusSchema>;
+export type UsageQueryDto = z.infer<typeof usageQuerySchema>;
+export type MetricsQueryDto = z.infer<typeof metricsQuerySchema>;
+export type InvoicesQueryDto = z.infer<typeof invoicesQuerySchema>;
+export type HealthInfoDto = z.infer<typeof healthSchema>;
+export type SendInvoiceDto = z.infer<typeof sendInvoiceSchema>;

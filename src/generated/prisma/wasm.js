@@ -142,13 +142,13 @@ exports.Prisma.OrganizacionesScalarFieldEnum = {
 
 exports.Prisma.SuscripcionesScalarFieldEnum = {
   id: 'id',
-  organizacionId: 'organizacionId',
+  organizacion_id: 'organizacion_id',
   plan: 'plan',
-  fechaInicio: 'fechaInicio',
-  fechaProximoPago: 'fechaProximoPago',
+  fecha_inicio: 'fecha_inicio',
+  fecha_proximo_pago: 'fecha_proximo_pago',
   estado: 'estado',
-  creadoEn: 'creadoEn',
-  actualizadoEn: 'actualizadoEn'
+  creado_en: 'creado_en',
+  actualizado_en: 'actualizado_en'
 };
 
 exports.Prisma.Tenant_usuariosScalarFieldEnum = {

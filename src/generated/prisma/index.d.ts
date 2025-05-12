@@ -3896,70 +3896,70 @@ export namespace Prisma {
 
   export type SuscripcionesMinAggregateOutputType = {
     id: string | null
-    organizacionId: string | null
+    organizacion_id: string | null
     plan: string | null
-    fechaInicio: Date | null
-    fechaProximoPago: Date | null
+    fecha_inicio: Date | null
+    fecha_proximo_pago: Date | null
     estado: string | null
-    creadoEn: Date | null
-    actualizadoEn: Date | null
+    creado_en: Date | null
+    actualizado_en: Date | null
   }
 
   export type SuscripcionesMaxAggregateOutputType = {
     id: string | null
-    organizacionId: string | null
+    organizacion_id: string | null
     plan: string | null
-    fechaInicio: Date | null
-    fechaProximoPago: Date | null
+    fecha_inicio: Date | null
+    fecha_proximo_pago: Date | null
     estado: string | null
-    creadoEn: Date | null
-    actualizadoEn: Date | null
+    creado_en: Date | null
+    actualizado_en: Date | null
   }
 
   export type SuscripcionesCountAggregateOutputType = {
     id: number
-    organizacionId: number
+    organizacion_id: number
     plan: number
-    fechaInicio: number
-    fechaProximoPago: number
+    fecha_inicio: number
+    fecha_proximo_pago: number
     estado: number
-    creadoEn: number
-    actualizadoEn: number
+    creado_en: number
+    actualizado_en: number
     _all: number
   }
 
 
   export type SuscripcionesMinAggregateInputType = {
     id?: true
-    organizacionId?: true
+    organizacion_id?: true
     plan?: true
-    fechaInicio?: true
-    fechaProximoPago?: true
+    fecha_inicio?: true
+    fecha_proximo_pago?: true
     estado?: true
-    creadoEn?: true
-    actualizadoEn?: true
+    creado_en?: true
+    actualizado_en?: true
   }
 
   export type SuscripcionesMaxAggregateInputType = {
     id?: true
-    organizacionId?: true
+    organizacion_id?: true
     plan?: true
-    fechaInicio?: true
-    fechaProximoPago?: true
+    fecha_inicio?: true
+    fecha_proximo_pago?: true
     estado?: true
-    creadoEn?: true
-    actualizadoEn?: true
+    creado_en?: true
+    actualizado_en?: true
   }
 
   export type SuscripcionesCountAggregateInputType = {
     id?: true
-    organizacionId?: true
+    organizacion_id?: true
     plan?: true
-    fechaInicio?: true
-    fechaProximoPago?: true
+    fecha_inicio?: true
+    fecha_proximo_pago?: true
     estado?: true
-    creadoEn?: true
-    actualizadoEn?: true
+    creado_en?: true
+    actualizado_en?: true
     _all?: true
   }
 
@@ -4037,13 +4037,13 @@ export namespace Prisma {
 
   export type SuscripcionesGroupByOutputType = {
     id: string
-    organizacionId: string
+    organizacion_id: string
     plan: string | null
-    fechaInicio: Date | null
-    fechaProximoPago: Date | null
+    fecha_inicio: Date | null
+    fecha_proximo_pago: Date | null
     estado: string | null
-    creadoEn: Date
-    actualizadoEn: Date
+    creado_en: Date
+    actualizado_en: Date
     _count: SuscripcionesCountAggregateOutputType | null
     _min: SuscripcionesMinAggregateOutputType | null
     _max: SuscripcionesMaxAggregateOutputType | null
@@ -4065,52 +4065,52 @@ export namespace Prisma {
 
   export type suscripcionesSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    organizacionId?: boolean
+    organizacion_id?: boolean
     plan?: boolean
-    fechaInicio?: boolean
-    fechaProximoPago?: boolean
+    fecha_inicio?: boolean
+    fecha_proximo_pago?: boolean
     estado?: boolean
-    creadoEn?: boolean
-    actualizadoEn?: boolean
+    creado_en?: boolean
+    actualizado_en?: boolean
     organizacion?: boolean | organizacionesDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["suscripciones"]>
 
   export type suscripcionesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    organizacionId?: boolean
+    organizacion_id?: boolean
     plan?: boolean
-    fechaInicio?: boolean
-    fechaProximoPago?: boolean
+    fecha_inicio?: boolean
+    fecha_proximo_pago?: boolean
     estado?: boolean
-    creadoEn?: boolean
-    actualizadoEn?: boolean
+    creado_en?: boolean
+    actualizado_en?: boolean
     organizacion?: boolean | organizacionesDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["suscripciones"]>
 
   export type suscripcionesSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    organizacionId?: boolean
+    organizacion_id?: boolean
     plan?: boolean
-    fechaInicio?: boolean
-    fechaProximoPago?: boolean
+    fecha_inicio?: boolean
+    fecha_proximo_pago?: boolean
     estado?: boolean
-    creadoEn?: boolean
-    actualizadoEn?: boolean
+    creado_en?: boolean
+    actualizado_en?: boolean
     organizacion?: boolean | organizacionesDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["suscripciones"]>
 
   export type suscripcionesSelectScalar = {
     id?: boolean
-    organizacionId?: boolean
+    organizacion_id?: boolean
     plan?: boolean
-    fechaInicio?: boolean
-    fechaProximoPago?: boolean
+    fecha_inicio?: boolean
+    fecha_proximo_pago?: boolean
     estado?: boolean
-    creadoEn?: boolean
-    actualizadoEn?: boolean
+    creado_en?: boolean
+    actualizado_en?: boolean
   }
 
-  export type suscripcionesOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "organizacionId" | "plan" | "fechaInicio" | "fechaProximoPago" | "estado" | "creadoEn" | "actualizadoEn", ExtArgs["result"]["suscripciones"]>
+  export type suscripcionesOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "organizacion_id" | "plan" | "fecha_inicio" | "fecha_proximo_pago" | "estado" | "creado_en" | "actualizado_en", ExtArgs["result"]["suscripciones"]>
   export type suscripcionesInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     organizacion?: boolean | organizacionesDefaultArgs<ExtArgs>
   }
@@ -4128,13 +4128,13 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      organizacionId: string
+      organizacion_id: string
       plan: string | null
-      fechaInicio: Date | null
-      fechaProximoPago: Date | null
+      fecha_inicio: Date | null
+      fecha_proximo_pago: Date | null
       estado: string | null
-      creadoEn: Date
-      actualizadoEn: Date
+      creado_en: Date
+      actualizado_en: Date
     }, ExtArgs["result"]["suscripciones"]>
     composites: {}
   }
@@ -4560,13 +4560,13 @@ export namespace Prisma {
    */
   interface suscripcionesFieldRefs {
     readonly id: FieldRef<"suscripciones", 'String'>
-    readonly organizacionId: FieldRef<"suscripciones", 'String'>
+    readonly organizacion_id: FieldRef<"suscripciones", 'String'>
     readonly plan: FieldRef<"suscripciones", 'String'>
-    readonly fechaInicio: FieldRef<"suscripciones", 'DateTime'>
-    readonly fechaProximoPago: FieldRef<"suscripciones", 'DateTime'>
+    readonly fecha_inicio: FieldRef<"suscripciones", 'DateTime'>
+    readonly fecha_proximo_pago: FieldRef<"suscripciones", 'DateTime'>
     readonly estado: FieldRef<"suscripciones", 'String'>
-    readonly creadoEn: FieldRef<"suscripciones", 'DateTime'>
-    readonly actualizadoEn: FieldRef<"suscripciones", 'DateTime'>
+    readonly creado_en: FieldRef<"suscripciones", 'DateTime'>
+    readonly actualizado_en: FieldRef<"suscripciones", 'DateTime'>
   }
     
 
@@ -11818,13 +11818,13 @@ export namespace Prisma {
 
   export const SuscripcionesScalarFieldEnum: {
     id: 'id',
-    organizacionId: 'organizacionId',
+    organizacion_id: 'organizacion_id',
     plan: 'plan',
-    fechaInicio: 'fechaInicio',
-    fechaProximoPago: 'fechaProximoPago',
+    fecha_inicio: 'fecha_inicio',
+    fecha_proximo_pago: 'fecha_proximo_pago',
     estado: 'estado',
-    creadoEn: 'creadoEn',
-    actualizadoEn: 'actualizadoEn'
+    creado_en: 'creado_en',
+    actualizado_en: 'actualizado_en'
   };
 
   export type SuscripcionesScalarFieldEnum = (typeof SuscripcionesScalarFieldEnum)[keyof typeof SuscripcionesScalarFieldEnum]
@@ -12173,25 +12173,25 @@ export namespace Prisma {
     OR?: suscripcionesWhereInput[]
     NOT?: suscripcionesWhereInput | suscripcionesWhereInput[]
     id?: UuidFilter<"suscripciones"> | string
-    organizacionId?: UuidFilter<"suscripciones"> | string
+    organizacion_id?: UuidFilter<"suscripciones"> | string
     plan?: StringNullableFilter<"suscripciones"> | string | null
-    fechaInicio?: DateTimeNullableFilter<"suscripciones"> | Date | string | null
-    fechaProximoPago?: DateTimeNullableFilter<"suscripciones"> | Date | string | null
+    fecha_inicio?: DateTimeNullableFilter<"suscripciones"> | Date | string | null
+    fecha_proximo_pago?: DateTimeNullableFilter<"suscripciones"> | Date | string | null
     estado?: StringNullableFilter<"suscripciones"> | string | null
-    creadoEn?: DateTimeFilter<"suscripciones"> | Date | string
-    actualizadoEn?: DateTimeFilter<"suscripciones"> | Date | string
+    creado_en?: DateTimeFilter<"suscripciones"> | Date | string
+    actualizado_en?: DateTimeFilter<"suscripciones"> | Date | string
     organizacion?: XOR<OrganizacionesScalarRelationFilter, organizacionesWhereInput>
   }
 
   export type suscripcionesOrderByWithRelationInput = {
     id?: SortOrder
-    organizacionId?: SortOrder
+    organizacion_id?: SortOrder
     plan?: SortOrderInput | SortOrder
-    fechaInicio?: SortOrderInput | SortOrder
-    fechaProximoPago?: SortOrderInput | SortOrder
+    fecha_inicio?: SortOrderInput | SortOrder
+    fecha_proximo_pago?: SortOrderInput | SortOrder
     estado?: SortOrderInput | SortOrder
-    creadoEn?: SortOrder
-    actualizadoEn?: SortOrder
+    creado_en?: SortOrder
+    actualizado_en?: SortOrder
     organizacion?: organizacionesOrderByWithRelationInput
   }
 
@@ -12200,25 +12200,25 @@ export namespace Prisma {
     AND?: suscripcionesWhereInput | suscripcionesWhereInput[]
     OR?: suscripcionesWhereInput[]
     NOT?: suscripcionesWhereInput | suscripcionesWhereInput[]
-    organizacionId?: UuidFilter<"suscripciones"> | string
+    organizacion_id?: UuidFilter<"suscripciones"> | string
     plan?: StringNullableFilter<"suscripciones"> | string | null
-    fechaInicio?: DateTimeNullableFilter<"suscripciones"> | Date | string | null
-    fechaProximoPago?: DateTimeNullableFilter<"suscripciones"> | Date | string | null
+    fecha_inicio?: DateTimeNullableFilter<"suscripciones"> | Date | string | null
+    fecha_proximo_pago?: DateTimeNullableFilter<"suscripciones"> | Date | string | null
     estado?: StringNullableFilter<"suscripciones"> | string | null
-    creadoEn?: DateTimeFilter<"suscripciones"> | Date | string
-    actualizadoEn?: DateTimeFilter<"suscripciones"> | Date | string
+    creado_en?: DateTimeFilter<"suscripciones"> | Date | string
+    actualizado_en?: DateTimeFilter<"suscripciones"> | Date | string
     organizacion?: XOR<OrganizacionesScalarRelationFilter, organizacionesWhereInput>
   }, "id">
 
   export type suscripcionesOrderByWithAggregationInput = {
     id?: SortOrder
-    organizacionId?: SortOrder
+    organizacion_id?: SortOrder
     plan?: SortOrderInput | SortOrder
-    fechaInicio?: SortOrderInput | SortOrder
-    fechaProximoPago?: SortOrderInput | SortOrder
+    fecha_inicio?: SortOrderInput | SortOrder
+    fecha_proximo_pago?: SortOrderInput | SortOrder
     estado?: SortOrderInput | SortOrder
-    creadoEn?: SortOrder
-    actualizadoEn?: SortOrder
+    creado_en?: SortOrder
+    actualizado_en?: SortOrder
     _count?: suscripcionesCountOrderByAggregateInput
     _max?: suscripcionesMaxOrderByAggregateInput
     _min?: suscripcionesMinOrderByAggregateInput
@@ -12229,13 +12229,13 @@ export namespace Prisma {
     OR?: suscripcionesScalarWhereWithAggregatesInput[]
     NOT?: suscripcionesScalarWhereWithAggregatesInput | suscripcionesScalarWhereWithAggregatesInput[]
     id?: UuidWithAggregatesFilter<"suscripciones"> | string
-    organizacionId?: UuidWithAggregatesFilter<"suscripciones"> | string
+    organizacion_id?: UuidWithAggregatesFilter<"suscripciones"> | string
     plan?: StringNullableWithAggregatesFilter<"suscripciones"> | string | null
-    fechaInicio?: DateTimeNullableWithAggregatesFilter<"suscripciones"> | Date | string | null
-    fechaProximoPago?: DateTimeNullableWithAggregatesFilter<"suscripciones"> | Date | string | null
+    fecha_inicio?: DateTimeNullableWithAggregatesFilter<"suscripciones"> | Date | string | null
+    fecha_proximo_pago?: DateTimeNullableWithAggregatesFilter<"suscripciones"> | Date | string | null
     estado?: StringNullableWithAggregatesFilter<"suscripciones"> | string | null
-    creadoEn?: DateTimeWithAggregatesFilter<"suscripciones"> | Date | string
-    actualizadoEn?: DateTimeWithAggregatesFilter<"suscripciones"> | Date | string
+    creado_en?: DateTimeWithAggregatesFilter<"suscripciones"> | Date | string
+    actualizado_en?: DateTimeWithAggregatesFilter<"suscripciones"> | Date | string
   }
 
   export type tenant_usuariosWhereInput = {
@@ -12849,79 +12849,79 @@ export namespace Prisma {
   }
 
   export type suscripcionesCreateInput = {
-    organizacionId: string
+    id?: string
     plan?: string | null
-    fechaInicio?: Date | string | null
-    fechaProximoPago?: Date | string | null
+    fecha_inicio?: Date | string | null
+    fecha_proximo_pago?: Date | string | null
     estado?: string | null
-    creadoEn?: Date | string
-    actualizadoEn?: Date | string
-    organizacion?: organizacionesCreateNestedOneWithoutSuscripcionesInput
+    creado_en?: Date | string
+    actualizado_en?: Date | string
+    organizacion: organizacionesCreateNestedOneWithoutSuscripcionesInput
   }
 
   export type suscripcionesUncheckedCreateInput = {
     id?: string
-    organizacionId: string
+    organizacion_id: string
     plan?: string | null
-    fechaInicio?: Date | string | null
-    fechaProximoPago?: Date | string | null
+    fecha_inicio?: Date | string | null
+    fecha_proximo_pago?: Date | string | null
     estado?: string | null
-    creadoEn?: Date | string
-    actualizadoEn?: Date | string
+    creado_en?: Date | string
+    actualizado_en?: Date | string
   }
 
   export type suscripcionesUpdateInput = {
-    organizacionId?: StringFieldUpdateOperationsInput | string
+    id?: StringFieldUpdateOperationsInput | string
     plan?: NullableStringFieldUpdateOperationsInput | string | null
-    fechaInicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    fechaProximoPago?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fecha_inicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fecha_proximo_pago?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     estado?: NullableStringFieldUpdateOperationsInput | string | null
-    creadoEn?: DateTimeFieldUpdateOperationsInput | Date | string
-    actualizadoEn?: DateTimeFieldUpdateOperationsInput | Date | string
+    creado_en?: DateTimeFieldUpdateOperationsInput | Date | string
+    actualizado_en?: DateTimeFieldUpdateOperationsInput | Date | string
     organizacion?: organizacionesUpdateOneRequiredWithoutSuscripcionesNestedInput
   }
 
   export type suscripcionesUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    organizacionId?: StringFieldUpdateOperationsInput | string
+    organizacion_id?: StringFieldUpdateOperationsInput | string
     plan?: NullableStringFieldUpdateOperationsInput | string | null
-    fechaInicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    fechaProximoPago?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fecha_inicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fecha_proximo_pago?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     estado?: NullableStringFieldUpdateOperationsInput | string | null
-    creadoEn?: DateTimeFieldUpdateOperationsInput | Date | string
-    actualizadoEn?: DateTimeFieldUpdateOperationsInput | Date | string
+    creado_en?: DateTimeFieldUpdateOperationsInput | Date | string
+    actualizado_en?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type suscripcionesCreateManyInput = {
     id?: string
-    organizacionId: string
+    organizacion_id: string
     plan?: string | null
-    fechaInicio?: Date | string | null
-    fechaProximoPago?: Date | string | null
+    fecha_inicio?: Date | string | null
+    fecha_proximo_pago?: Date | string | null
     estado?: string | null
-    creadoEn?: Date | string
-    actualizadoEn?: Date | string
+    creado_en?: Date | string
+    actualizado_en?: Date | string
   }
 
   export type suscripcionesUpdateManyMutationInput = {
-    organizacionId?: StringFieldUpdateOperationsInput | string
+    id?: StringFieldUpdateOperationsInput | string
     plan?: NullableStringFieldUpdateOperationsInput | string | null
-    fechaInicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    fechaProximoPago?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fecha_inicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fecha_proximo_pago?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     estado?: NullableStringFieldUpdateOperationsInput | string | null
-    creadoEn?: DateTimeFieldUpdateOperationsInput | Date | string
-    actualizadoEn?: DateTimeFieldUpdateOperationsInput | Date | string
+    creado_en?: DateTimeFieldUpdateOperationsInput | Date | string
+    actualizado_en?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type suscripcionesUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    organizacionId?: StringFieldUpdateOperationsInput | string
+    organizacion_id?: StringFieldUpdateOperationsInput | string
     plan?: NullableStringFieldUpdateOperationsInput | string | null
-    fechaInicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    fechaProximoPago?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fecha_inicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fecha_proximo_pago?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     estado?: NullableStringFieldUpdateOperationsInput | string | null
-    creadoEn?: DateTimeFieldUpdateOperationsInput | Date | string
-    actualizadoEn?: DateTimeFieldUpdateOperationsInput | Date | string
+    creado_en?: DateTimeFieldUpdateOperationsInput | Date | string
+    actualizado_en?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type tenant_usuariosCreateInput = {
@@ -13701,35 +13701,35 @@ export namespace Prisma {
 
   export type suscripcionesCountOrderByAggregateInput = {
     id?: SortOrder
-    organizacionId?: SortOrder
+    organizacion_id?: SortOrder
     plan?: SortOrder
-    fechaInicio?: SortOrder
-    fechaProximoPago?: SortOrder
+    fecha_inicio?: SortOrder
+    fecha_proximo_pago?: SortOrder
     estado?: SortOrder
-    creadoEn?: SortOrder
-    actualizadoEn?: SortOrder
+    creado_en?: SortOrder
+    actualizado_en?: SortOrder
   }
 
   export type suscripcionesMaxOrderByAggregateInput = {
     id?: SortOrder
-    organizacionId?: SortOrder
+    organizacion_id?: SortOrder
     plan?: SortOrder
-    fechaInicio?: SortOrder
-    fechaProximoPago?: SortOrder
+    fecha_inicio?: SortOrder
+    fecha_proximo_pago?: SortOrder
     estado?: SortOrder
-    creadoEn?: SortOrder
-    actualizadoEn?: SortOrder
+    creado_en?: SortOrder
+    actualizado_en?: SortOrder
   }
 
   export type suscripcionesMinOrderByAggregateInput = {
     id?: SortOrder
-    organizacionId?: SortOrder
+    organizacion_id?: SortOrder
     plan?: SortOrder
-    fechaInicio?: SortOrder
-    fechaProximoPago?: SortOrder
+    fecha_inicio?: SortOrder
+    fecha_proximo_pago?: SortOrder
     estado?: SortOrder
-    creadoEn?: SortOrder
-    actualizadoEn?: SortOrder
+    creado_en?: SortOrder
+    actualizado_en?: SortOrder
   }
 
   export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -14659,23 +14659,23 @@ export namespace Prisma {
   }
 
   export type suscripcionesCreateWithoutOrganizacionInput = {
-    organizacionId: string
+    id?: string
     plan?: string | null
-    fechaInicio?: Date | string | null
-    fechaProximoPago?: Date | string | null
+    fecha_inicio?: Date | string | null
+    fecha_proximo_pago?: Date | string | null
     estado?: string | null
-    creadoEn?: Date | string
-    actualizadoEn?: Date | string
+    creado_en?: Date | string
+    actualizado_en?: Date | string
   }
 
   export type suscripcionesUncheckedCreateWithoutOrganizacionInput = {
-    organizacionId: string
+    id?: string
     plan?: string | null
-    fechaInicio?: Date | string | null
-    fechaProximoPago?: Date | string | null
+    fecha_inicio?: Date | string | null
+    fecha_proximo_pago?: Date | string | null
     estado?: string | null
-    creadoEn?: Date | string
-    actualizadoEn?: Date | string
+    creado_en?: Date | string
+    actualizado_en?: Date | string
   }
 
   export type suscripcionesCreateOrConnectWithoutOrganizacionInput = {
@@ -14741,13 +14741,13 @@ export namespace Prisma {
     OR?: suscripcionesScalarWhereInput[]
     NOT?: suscripcionesScalarWhereInput | suscripcionesScalarWhereInput[]
     id?: UuidFilter<"suscripciones"> | string
-    organizacionId?: UuidFilter<"suscripciones"> | string
+    organizacion_id?: UuidFilter<"suscripciones"> | string
     plan?: StringNullableFilter<"suscripciones"> | string | null
-    fechaInicio?: DateTimeNullableFilter<"suscripciones"> | Date | string | null
-    fechaProximoPago?: DateTimeNullableFilter<"suscripciones"> | Date | string | null
+    fecha_inicio?: DateTimeNullableFilter<"suscripciones"> | Date | string | null
+    fecha_proximo_pago?: DateTimeNullableFilter<"suscripciones"> | Date | string | null
     estado?: StringNullableFilter<"suscripciones"> | string | null
-    creadoEn?: DateTimeFilter<"suscripciones"> | Date | string
-    actualizadoEn?: DateTimeFilter<"suscripciones"> | Date | string
+    creado_en?: DateTimeFilter<"suscripciones"> | Date | string
+    actualizado_en?: DateTimeFilter<"suscripciones"> | Date | string
   }
 
   export type tenant_usuariosUpsertWithWhereUniqueWithoutOrganizacionInput = {
@@ -15546,13 +15546,13 @@ export namespace Prisma {
   }
 
   export type suscripcionesCreateManyOrganizacionInput = {
-    organizacionId: string
+    id?: string
     plan?: string | null
-    fechaInicio?: Date | string | null
-    fechaProximoPago?: Date | string | null
+    fecha_inicio?: Date | string | null
+    fecha_proximo_pago?: Date | string | null
     estado?: string | null
-    creadoEn?: Date | string
-    actualizadoEn?: Date | string
+    creado_en?: Date | string
+    actualizado_en?: Date | string
   }
 
   export type tenant_usuariosCreateManyOrganizacionInput = {
@@ -15567,33 +15567,33 @@ export namespace Prisma {
   }
 
   export type suscripcionesUpdateWithoutOrganizacionInput = {
-    organizacionId?: StringFieldUpdateOperationsInput | string
+    id?: StringFieldUpdateOperationsInput | string
     plan?: NullableStringFieldUpdateOperationsInput | string | null
-    fechaInicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    fechaProximoPago?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fecha_inicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fecha_proximo_pago?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     estado?: NullableStringFieldUpdateOperationsInput | string | null
-    creadoEn?: DateTimeFieldUpdateOperationsInput | Date | string
-    actualizadoEn?: DateTimeFieldUpdateOperationsInput | Date | string
+    creado_en?: DateTimeFieldUpdateOperationsInput | Date | string
+    actualizado_en?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type suscripcionesUncheckedUpdateWithoutOrganizacionInput = {
-    organizacionId?: StringFieldUpdateOperationsInput | string
+    id?: StringFieldUpdateOperationsInput | string
     plan?: NullableStringFieldUpdateOperationsInput | string | null
-    fechaInicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    fechaProximoPago?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fecha_inicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fecha_proximo_pago?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     estado?: NullableStringFieldUpdateOperationsInput | string | null
-    creadoEn?: DateTimeFieldUpdateOperationsInput | Date | string
-    actualizadoEn?: DateTimeFieldUpdateOperationsInput | Date | string
+    creado_en?: DateTimeFieldUpdateOperationsInput | Date | string
+    actualizado_en?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type suscripcionesUncheckedUpdateManyWithoutOrganizacionInput = {
-    organizacionId?: StringFieldUpdateOperationsInput | string
+    id?: StringFieldUpdateOperationsInput | string
     plan?: NullableStringFieldUpdateOperationsInput | string | null
-    fechaInicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    fechaProximoPago?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fecha_inicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fecha_proximo_pago?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     estado?: NullableStringFieldUpdateOperationsInput | string | null
-    creadoEn?: DateTimeFieldUpdateOperationsInput | Date | string
-    actualizadoEn?: DateTimeFieldUpdateOperationsInput | Date | string
+    creado_en?: DateTimeFieldUpdateOperationsInput | Date | string
+    actualizado_en?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type tenant_usuariosUpdateWithoutOrganizacionInput = {

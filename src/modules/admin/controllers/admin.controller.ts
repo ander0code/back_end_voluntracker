@@ -1,8 +1,15 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { AdminService } from '../services/admin.service';
 import { logger } from '../../../shared/services/logger';
 import { AppError } from '../../../shared/middleware/errorHandler';
-import { registerAdminSchema } from '../DTOs/admin.dto';
+import { 
+  registerAdminSchema, 
+  UsageQueryDto, 
+  MetricsQueryDto, 
+  InvoicesQueryDto,
+  SendInvoiceDto,
+  registerTenantAdminSchema
+} from '../DTOs/admin.dto';
 
 // Instancia del servicio
 const adminService = new AdminService();
@@ -97,7 +104,6 @@ export const tenantController = {
       // Utilizamos el método específico para actualizar el plan
       const tenant = await adminService.updateOrganizacionPlan(id, {
         plan,
-        comentario: req.body.comentario
       });
       
       return res.status(200).json({
@@ -126,11 +132,11 @@ export const tenantController = {
       }
       
       // Convertimos la fecha a formato Date
-      const fechaProximoPago = new Date(fecha);
+      const fecha_proximo_pago = new Date(fecha);
       
       // Utilizamos el método específico para actualizar la fecha de pago
       const tenant = await adminService.updateFechaPago(id, {
-        fecha_proximo_pago: fechaProximoPago,
+        fecha_proximo_pago: fecha_proximo_pago,
         comentario: req.body.comentario
       });
       
@@ -211,5 +217,211 @@ export const registerAdmin = async (req: Request, res: Response) => {
       status: 'error',
       message: 'Error en el servidor al registrar el administrador'
     });
+  }
+};
+
+/**
+ * Controladores para la gestión avanzada de tenants
+ */
+export const statusController = {
+  // PATCH /api/admin/tenants/:id/status
+  updateStatus: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { estado } = req.body;
+      
+      if (!estado || !['activo', 'suspendido', 'cancelado'].includes(estado)) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Estado inválido. Valores permitidos: activo, suspendido, cancelado'
+        });
+      }
+      
+      const tenant = await adminService.updateOrganizacionStatus(id, { estado });
+      
+      return res.status(200).json({
+        status: 'success',
+        data: tenant,
+        message: `Estado del tenant actualizado a: ${estado}`
+      });
+    } catch (error: any) {
+      logger.error(`Error al actualizar estado: ${error.message}`);
+      const statusCode = error instanceof AppError ? error.statusCode : 500;
+      return res.status(statusCode).json({
+        status: 'error',
+        message: error.message || 'Error al actualizar estado'
+      });
+    }
+  }
+};
+
+/**
+ * Controladores para analítica y monitoreo
+ */
+export const analyticsController = {
+  // GET /api/admin/tenants/:id/usage
+  getUsage: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const query: UsageQueryDto = {
+        desde: req.query.desde as string,
+        hasta: req.query.hasta as string
+      };
+      
+      const usageData = await adminService.getOrganizacionUsage(id, query);
+      
+      return res.status(200).json({
+        status: 'success',
+        data: usageData
+      });
+    } catch (error: any) {
+      logger.error(`Error al obtener datos de uso: ${error.message}`);
+      const statusCode = error instanceof AppError ? error.statusCode : 500;
+      return res.status(statusCode).json({
+        status: 'error',
+        message: error.message || 'Error al obtener datos de uso'
+      });
+    }
+  },
+  
+  // GET /api/admin/tenants/:id/metrics
+  getMetrics: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const query: MetricsQueryDto = {
+        desde: req.query.desde as string,
+        hasta: req.query.hasta as string,
+        tipo: req.query.tipo as 'latencia' | 'errores' | 'todos' || 'todos'
+      };
+      
+      const metricsData = await adminService.getOrganizacionMetrics(id, query);
+      
+      return res.status(200).json({
+        status: 'success',
+        data: metricsData
+      });
+    } catch (error: any) {
+      logger.error(`Error al obtener métricas: ${error.message}`);
+      const statusCode = error instanceof AppError ? error.statusCode : 500;
+      return res.status(statusCode).json({
+        status: 'error',
+        message: error.message || 'Error al obtener métricas'
+      });
+    }
+  }
+};
+
+/**
+ * Controladores para facturación
+ */
+export const billingController = {
+  // GET /api/admin/billing/invoices
+  getInvoices: async (req: Request, res: Response) => {
+    try {
+      const query: InvoicesQueryDto = {
+        desde: req.query.desde as string,
+        hasta: req.query.hasta as string,
+        estado: req.query.estado as 'pagada' | 'pendiente' | 'vencida' | 'todas' || 'todas'
+      };
+      
+      const invoices = await adminService.getInvoices(query);
+      
+      return res.status(200).json({
+        status: 'success',
+        data: invoices
+      });
+    } catch (error: any) {
+      logger.error(`Error al obtener facturas: ${error.message}`);
+      const statusCode = error instanceof AppError ? error.statusCode : 500;
+      return res.status(statusCode).json({
+        status: 'error',
+        message: error.message || 'Error al obtener facturas'
+      });
+    }
+  }
+};
+
+/**
+ * Controlador para estado de salud del sistema
+ */
+export const healthController = {
+  // GET /api/admin/health
+  getHealth: async (req: Request, res: Response) => {
+    try {
+      const healthInfo = await adminService.getHealthInfo();
+      
+      return res.status(200).json({
+        status: 'success',
+        data: healthInfo
+      });
+    } catch (error: any) {
+      logger.error(`Error al obtener estado de salud: ${error.message}`);
+      const statusCode = error instanceof AppError ? error.statusCode : 500;
+      return res.status(statusCode).json({
+        status: 'error',
+        message: error.message || 'Error al obtener estado de salud'
+      });
+    }
+  }
+};
+
+/**
+ * Controlador para envío de facturas
+ */
+export const invoicesController = {
+  // POST /api/admin/billing/invoices/:id/send
+  sendInvoice: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const sendOptions: SendInvoiceDto = {
+        method: req.body.method || 'email',
+        destinatario: req.body.destinatario,
+        mensaje: req.body.mensaje,
+        cc: req.body.cc,
+        incluirAdjuntos: req.body.incluirAdjuntos !== false
+      };
+      
+      const result = await adminService.sendInvoice(id, sendOptions);
+      
+      return res.status(200).json({
+        status: 'success',
+        message: `Factura enviada correctamente vía ${sendOptions.method}`,
+        data: result
+      });
+    } catch (error: any) {
+      logger.error(`Error al enviar factura: ${error.message}`);
+      const statusCode = error instanceof AppError ? error.statusCode : 500;
+      return res.status(statusCode).json({
+        status: 'error',
+        message: error.message || 'Error al enviar factura'
+      });
+    }
+  }
+};
+
+// Controladores para gestión de admins de tenant
+export const tenantAdminController = {
+  /**
+   * Registrar un nuevo administrador para un tenant específico
+   */
+  async registerTenantAdmin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const tenantId = req.params.id;
+      const data = req.body;
+      
+      // Validar datos de entrada con zod
+      const validatedData = registerTenantAdminSchema.parse(data);
+      
+      // Crear el administrador de tenant
+      const result = await adminService.registerTenantAdmin(tenantId, validatedData);
+      
+      return res.status(201).json({
+        status: 'success',
+        message: 'Administrador de tenant creado con éxito',
+        data: result
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 };
