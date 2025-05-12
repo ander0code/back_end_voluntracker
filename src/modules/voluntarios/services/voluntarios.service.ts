@@ -13,9 +13,16 @@ export const obtenerTodos = async (schema: string) => {
   await setSearchPath(schema);
   return prisma.$queryRawUnsafe(`SELECT * FROM "${schema}".voluntarios`);
 };
+
 export const crearVoluntario = async (schema: string, data: CrearVoluntarioDTO) => {
   await setSearchPath(schema);
-  return prisma.voluntarios.create({ data });
+
+  // Usamos plantillas de texto para insertar los valores directamente
+  return prisma.$queryRawUnsafe(`
+    INSERT INTO "${schema}".voluntarios (nombre_completo, dni, correo, telefono, coordinador_id, area, estado)
+    VALUES ('${data.nombre_completo}', '${data.dni}', '${data.correo}', '${data.telefono}', '${data.coordinador_id}', '${data.area}', '${data.estado}')
+    RETURNING *;
+  `);
 };
 
 export const actualizarVoluntario = async (schema: string, id: string, data: ActualizarVoluntarioDTO) => {

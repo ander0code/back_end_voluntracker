@@ -8,7 +8,6 @@ const router = Router();
 
 // Middleware de autenticación y autorización para todas las rutas de voluntarios
 router.use(authMiddleware);
-router.use(requireRole('admin_plataforma'));
 
 /**
  * @swagger
@@ -63,8 +62,14 @@ router.get('/', voluntarioController.obtenerTodos);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - nombre_completo
+ *               - correo
+ *               - dni
+ *               - telefono
+ *               - coordinador_id
  *             properties:
- *               nombre:
+ *               nombre_completo:
  *                 type: string
  *               correo:
  *                 type: string
@@ -73,6 +78,13 @@ router.get('/', voluntarioController.obtenerTodos);
  *                 type: string
  *               telefono:
  *                 type: string
+ *               coordinador_id:
+ *                 type: string
+ *               area:
+ *                 type: string
+ *               estado:
+ *                 type: string
+ *                 example: activo
  *     responses:
  *       201:
  *         description: Voluntario creado correctamente
@@ -81,7 +93,7 @@ router.get('/', voluntarioController.obtenerTodos);
  *       500:
  *         description: Error del servidor
  */
-router.post('/voluntarios', voluntarioController.crearVoluntario);
+router.post('/', voluntarioController.crearVoluntario);
 
 /**
  * @swagger
